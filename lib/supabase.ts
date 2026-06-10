@@ -22,12 +22,6 @@ function getSupabaseClient(): SupabaseClient {
     return client
   }
 
-  if (process.env.NODE_ENV === "production") {
-    throw new Error(
-      "Missing Supabase configuration. Set NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY (see .env.example).",
-    )
-  }
-
   if (!warnedMissingEnv) {
     console.warn(
       "[supabase] NEXT_PUBLIC_SUPABASE_URL and NEXT_PUBLIC_SUPABASE_ANON_KEY are not set. Copy .env.example to .env.local and add your project credentials from https://supabase.com/dashboard/project/_/settings/api",
