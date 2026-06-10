@@ -38,10 +38,12 @@ export default function PageWrapper({ children }: { children: ReactNode }) {
       {hasAgreed ? (
         children
       ) : (
-        <div className="fixed inset-0 bg-gray-100 flex items-center justify-center p-4">
-          <div className="text-center max-w-md">
-            <h2 className="text-xl font-semibold text-gray-800 mb-2">Please Accept the Disclaimer</h2>
-            <p className="text-gray-600">You need to accept the disclaimer to access the website content.</p>
+        <div className="fixed inset-0 flex items-center justify-center bg-ca-darkBlue/80 p-4 backdrop-blur-sm">
+          <div className="max-w-md rounded-xl border border-white/10 bg-white px-8 py-10 text-center shadow-2xl">
+            <h2 className="mb-2 text-xl font-semibold text-ca-darkBlue">Please Accept the Disclaimer</h2>
+            <p className="text-sm leading-relaxed text-gray-600">
+              Review and accept the disclaimer in the dialog above to access the website.
+            </p>
           </div>
         </div>
       )}

@@ -15,17 +15,16 @@ import {
   Newspaper,
   LogIn,
   User,
-  Users,
   ExternalLink,
 } from "lucide-react"
 import { useAuth } from "@/contexts/AuthContext"
 import Logo from "./Logo"
 
 export default function Navbar() {
+  const employeeClientLoginUrl = "https://manager-pro-gamma.vercel.app/"
   const [isOpen, setIsOpen] = useState(false)
   const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isKnowledgeMenuOpen, setIsKnowledgeMenuOpen] = useState(false)
-  const [isLoginMenuOpen, setIsLoginMenuOpen] = useState(false)
   const [isMobileKnowledgeOpen, setIsMobileKnowledgeOpen] = useState(false)
   const [isServicesMenuOpen, setIsServicesMenuOpen] = useState(false)
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false)
@@ -33,7 +32,6 @@ export default function Navbar() {
   const { user, signOut } = useAuth()
   const userMenuRef = useRef<HTMLDivElement>(null)
   const knowledgeMenuRef = useRef<HTMLDivElement>(null)
-  const loginMenuRef = useRef<HTMLDivElement>(null)
   const mobileKnowledgeRef = useRef<HTMLDivElement>(null)
   const servicesMenuRef = useRef<HTMLDivElement>(null)
   const mobileServicesRef = useRef<HTMLDivElement>(null)
@@ -49,21 +47,12 @@ export default function Navbar() {
   const toggleUserMenu = () => {
     setIsUserMenuOpen(!isUserMenuOpen)
     if (isKnowledgeMenuOpen) setIsKnowledgeMenuOpen(false)
-    if (isLoginMenuOpen) setIsLoginMenuOpen(false)
     if (isServicesMenuOpen) setIsServicesMenuOpen(false)
   }
 
   const toggleKnowledgeMenu = () => {
     setIsKnowledgeMenuOpen(!isKnowledgeMenuOpen)
     if (isUserMenuOpen) setIsUserMenuOpen(false)
-    if (isLoginMenuOpen) setIsLoginMenuOpen(false)
-    if (isServicesMenuOpen) setIsServicesMenuOpen(false)
-  }
-
-  const toggleLoginMenu = () => {
-    setIsLoginMenuOpen(!isLoginMenuOpen)
-    if (isUserMenuOpen) setIsUserMenuOpen(false)
-    if (isKnowledgeMenuOpen) setIsKnowledgeMenuOpen(false)
     if (isServicesMenuOpen) setIsServicesMenuOpen(false)
   }
 
@@ -75,7 +64,6 @@ export default function Navbar() {
     setIsServicesMenuOpen(!isServicesMenuOpen)
     if (isUserMenuOpen) setIsUserMenuOpen(false)
     if (isKnowledgeMenuOpen) setIsKnowledgeMenuOpen(false)
-    if (isLoginMenuOpen) setIsLoginMenuOpen(false)
   }
 
   const toggleMobileServices = () => {
@@ -109,9 +97,6 @@ export default function Navbar() {
       }
       if (knowledgeMenuRef.current && !knowledgeMenuRef.current.contains(event.target as Node)) {
         setIsKnowledgeMenuOpen(false)
-      }
-      if (loginMenuRef.current && !loginMenuRef.current.contains(event.target as Node)) {
-        setIsLoginMenuOpen(false)
       }
       if (mobileKnowledgeRef.current && !mobileKnowledgeRef.current.contains(event.target as Node)) {
         setIsMobileKnowledgeOpen(false)
@@ -389,52 +374,16 @@ export default function Navbar() {
                   )}
                 </div>
               ) : (
-                <div className="relative" ref={loginMenuRef}>
-                  <button
-                    onClick={toggleLoginMenu}
-                    className="inline-flex items-center px-3 py-2 text-sm font-medium rounded-md text-gray-700 hover:text-ca-purple hover:bg-gray-50"
-                    aria-expanded={isLoginMenuOpen}
-                  >
-                    <LogIn className="mr-1.5 h-4 w-4" />
-                    Login
-                    <ChevronDown
-                      className={`ml-1 h-4 w-4 transition-transform ${isLoginMenuOpen ? "rotate-180" : ""}`}
-                    />
-                  </button>
-
-                  {isLoginMenuOpen && (
-                    <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right bg-white border border-gray-200 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
-                      <div className="py-1">
-                        <a
-                          href="https://kvineethreddyco.cacloud.ca.in/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setIsLoginMenuOpen(false)}
-                        >
-                          <div className="flex items-center">
-                            <User className="mr-2 h-4 w-4 text-ca-purple" />
-                            <span>Client Login</span>
-                          </div>
-                          <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
-                        </a>
-                        <a
-                          href="https://kvineethreddyco.cacloud.ca.in/"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="flex items-center justify-between px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          onClick={() => setIsLoginMenuOpen(false)}
-                        >
-                          <div className="flex items-center">
-                            <Users className="mr-2 h-4 w-4 text-ca-purple" />
-                            <span>Employer Login</span>
-                          </div>
-                          <ExternalLink className="h-3.5 w-3.5 text-gray-400" />
-                        </a>
-                      </div>
-                    </div>
-                  )}
-                </div>
+                <a
+                  href={employeeClientLoginUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-ca-purple"
+                >
+                  <LogIn className="mr-1.5 h-4 w-4" />
+                  Employee/Client Login
+                  <ExternalLink className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
+                </a>
               )}
             </div>
           </div>
@@ -666,30 +615,17 @@ export default function Navbar() {
             </div>
           ) : (
             <div className="mt-3 space-y-1 px-2">
-              <div className="pl-3 pr-4 py-1 text-xs font-semibold text-gray-500">Login Options</div>
+              <div className="pl-3 pr-4 py-1 text-xs font-semibold text-gray-500">Login</div>
               <a
-                href="https://kvineethreddyco.cacloud.ca.in/"
+                href={employeeClientLoginUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="flex items-center justify-between pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
+                className="flex items-center justify-between pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
                 onClick={closeMenu}
               >
                 <div className="flex items-center">
                   <User className="mr-2 h-5 w-5 text-ca-purple" />
-                  <span>Client Login</span>
-                </div>
-                <ExternalLink className="h-4 w-4 text-gray-400" />
-              </a>
-              <a
-                href="https://kvineethreddyco.cacloud.ca.in/"
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                onClick={closeMenu}
-              >
-                <div className="flex items-center">
-                  <Users className="mr-2 h-5 w-5 text-ca-purple" />
-                  <span>Employer Login</span>
+                  <span>Employee/Client Login</span>
                 </div>
                 <ExternalLink className="h-4 w-4 text-gray-400" />
               </a>
