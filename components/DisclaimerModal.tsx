@@ -30,8 +30,13 @@ export default function DisclaimerModal() {
       <div className="flex max-h-[min(90vh,720px)] w-full max-w-2xl flex-col overflow-hidden rounded-xl border border-white/10 bg-white shadow-2xl">
         {/* Header */}
         <div className="shrink-0 bg-gradient-to-r from-ca-darkBlue via-ca-purple to-ca-lightPurple px-6 py-5 text-white sm:px-8">
-          <div className="mb-4 flex justify-center [&_img]:h-auto [&_img]:max-h-14 [&_img]:w-auto [&_img]:brightness-0 [&_img]:invert">
-            <Logo size="small" linkWrapper={false} />
+          <div className="mb-4 flex justify-center">
+            <Logo
+              variant="light"
+              size="small"
+              linkWrapper={false}
+              className="shadow-sm [&_img]:h-auto [&_img]:max-h-14 [&_img]:w-auto"
+            />
           </div>
           <div className="flex items-center justify-center gap-2">
             <Scale className="h-5 w-5 shrink-0 text-ca-orange" aria-hidden />
