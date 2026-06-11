@@ -66,7 +66,7 @@ export function NewsletterSignup() {
                 <input
                   type="email"
                   placeholder="Your email address"
-                  className={`w-full px-4 py-3 bg-white/10 backdrop-blur-sm rounded-lg focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-white/50 ${error ? "border border-red-400" : ""}`}
+                  className={`w-full px-4 py-3 bg-white/10 backdrop-blur-sm rounded-lg text-white focus:outline-none focus:ring-2 focus:ring-white/50 placeholder-white/50 ${error ? "border border-red-400" : ""}`}
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
                 />

@@ -6,6 +6,26 @@
   .text-balance {
     text-wrap: balance;
   }
+
+  .text-contrast-light {
+    color: #ffffff;
+  }
+
+  .text-contrast-dark {
+    color: #111827;
+  }
+
+  .text-contrast-primary {
+    color: #0a0f25;
+  }
+
+  .text-contrast-secondary {
+    color: #4a2880;
+  }
+
+  .text-contrast-accent {
+    color: #ff8c38;
+  }
 }
 
 @layer base {
@@ -88,5 +108,12 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+
+  .bg-white,
+  .bg-gray-50,
+  .bg-white\/80,
+  .bg-white\/90 {
+    color: #111827;
   }
 }

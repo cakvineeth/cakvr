@@ -64,14 +64,14 @@ export function FAQSection() {
           {FAQS.map((faq, index) => (
             <motion.div
               key={index}
-              className="border rounded-lg overflow-hidden"
+              className="border rounded-lg overflow-hidden bg-white text-gray-900"
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: index * 0.1 }}
             >
               <button
                 onClick={() => toggleFAQ(index)}
-                className="w-full flex justify-between items-center p-4 text-left focus:outline-none"
+                className="w-full flex justify-between items-center p-4 text-left text-gray-900 focus:outline-none hover:bg-gray-50"
               >
                 <span className="font-medium">{faq.question}</span>
                 {openIndex === index ? (
