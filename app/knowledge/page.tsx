@@ -9,7 +9,6 @@ import { ResourceLinks } from "@/components/knowledge/ResourceLinks"
 import { TaxCalculator } from "@/components/knowledge/TaxCalculator"
 import { FAQSection } from "@/components/knowledge/FAQSection"
 import { motion } from "framer-motion"
-import { ContrastText } from "@/components/ui/contrast-text"
 
 export default function Knowledge() {
   const [activeTab, setActiveTab] = useState("all")
@@ -26,13 +25,13 @@ export default function Knowledge() {
           <div className="flex justify-center mb-6">
             <Logo size="large" />
           </div>
-          <ContrastText as="h1" variant="primary" className="text-4xl font-bold mb-4">
+          <h1 className="text-4xl font-bold mb-4 text-ca-darkBlue">
             Knowledge Center
-          </ContrastText>
-          <ContrastText as="p" variant="dark" className="text-gray-600 max-w-3xl mx-auto">
+          </h1>
+          <p className="text-gray-600 max-w-3xl mx-auto">
             Access valuable resources, stay updated with the latest tax regulations, and enhance your financial
             knowledge with our comprehensive tools and insights.
-          </ContrastText>
+          </p>
         </motion.div>
 
         {/* Tab Navigation */}
