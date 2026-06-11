@@ -3,7 +3,6 @@ import CompanyValues from "./CompanyValues"
 import FounderProfile from "./FounderProfile"
 import ExpertiseSection from "./ExpertiseSection"
 import CompanyTimeline from "./CompanyTimeline"
-import OfficeGallery from "./OfficeGallery"
 import TeamSectionNew from "./TeamSectionNew"
 
 const AboutPageContentNew = () => {
@@ -15,7 +14,6 @@ const AboutPageContentNew = () => {
       <TeamSectionNew />
       <ExpertiseSection />
       <CompanyTimeline />
-      <OfficeGallery />
     </div>
   )
 }
