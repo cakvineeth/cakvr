@@ -1,50 +1,21 @@
 "use client"
 
-import { useState } from "react"
+import { useMemo, useState } from "react"
 import { motion } from "framer-motion"
-import { CalendarIcon, Clock, MapPin, Users, ExternalLink } from "lucide-react"
+import { CalendarIcon, Building, Clock, FileText, ReceiptIndianRupee, Users } from "lucide-react"
 
-// Sample events data - in a real application, this would come from an API or database
-const EVENTS = [
-  {
-    id: 1,
-    title: "GST Filing Webinar",
-    date: "2025-04-15",
-    time: "11:00 AM - 12:30 PM",
-    location: "Online",
-    type: "webinar",
-    description: "Learn about the latest GST filing requirements and best practices for businesses in India.",
-  },
-  {
-    id: 2,
-    title: "Budget 2025 Impact Analysis",
-    date: "2025-04-20",
-    time: "3:00 PM - 5:00 PM",
-    location: "ASK Towers, Bengaluru",
-    type: "seminar",
-    description: "In-depth analysis of the Union Budget 2025 and its implications for businesses and individuals.",
-  },
-  {
-    id: 3,
-    title: "Tax Planning for Startups",
-    date: "2025-05-05",
-    time: "2:00 PM - 4:00 PM",
-    location: "Online",
-    type: "workshop",
-    description: "Comprehensive tax planning strategies for Indian startups and entrepreneurs.",
-  },
-  {
-    id: 4,
-    title: "ITR Filing Workshop",
-    date: "2025-05-15",
-    time: "10:00 AM - 12:00 PM",
-    location: "ASK Towers, Bengaluru",
-    type: "workshop",
-    description: "Hands-on workshop to guide individuals through the ITR filing process for AY 2025-26.",
-  },
-]
+type EventType = "gst" | "income-tax" | "tds" | "roc" | "msme"
 
-// Month names for the calendar
+type ComplianceEvent = {
+  id: string
+  title: string
+  date: string
+  time: string
+  location: string
+  type: EventType
+  description: string
+}
+
 const MONTHS = [
   "January",
   "February",
@@ -60,48 +31,135 @@ const MONTHS = [
   "December",
 ]
 
-export function Calendar() {
-  const [currentMonth, setCurrentMonth] = useState(3) // April (0-indexed)
-  const [currentYear, setCurrentYear] = useState(2025)
-  const [selectedDate, setSelectedDate] = useState<string | null>(null)
-  const [filter, setFilter] = useState<string | null>(null)
+const EVENT_TYPES: Record<EventType, { label: string; color: string; icon: React.ReactNode }> = {
+  gst: {
+    label: "GST",
+    color: "bg-blue-100 text-blue-700 border-blue-200",
+    icon: <ReceiptIndianRupee className="h-5 w-5" />,
+  },
+  "income-tax": {
+    label: "Income Tax",
+    color: "bg-emerald-100 text-emerald-700 border-emerald-200",
+    icon: <FileText className="h-5 w-5" />,
+  },
+  tds: {
+    label: "TDS",
+    color: "bg-purple-100 text-purple-700 border-purple-200",
+    icon: <Clock className="h-5 w-5" />,
+  },
+  roc: {
+    label: "ROC",
+    color: "bg-orange-100 text-orange-700 border-orange-200",
+    icon: <Building className="h-5 w-5" />,
+  },
+  msme: {
+    label: "MSME",
+    color: "bg-rose-100 text-rose-700 border-rose-200",
+    icon: <Users className="h-5 w-5" />,
+  },
+}
 
-  // Get events for the selected date
-  const filteredEvents = EVENTS.filter((event) => {
+const dateFor = (year: number, monthIndex: number, day: number) =>
+  `${year}-${String(monthIndex + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
+
+const addEvent = (
+  events: ComplianceEvent[],
+  year: number,
+  monthIndex: number,
+  day: number,
+  type: EventType,
+  title: string,
+  description: string,
+) => {
+  events.push({
+    id: `${year}-${monthIndex + 1}-${day}-${type}-${title}`,
+    title,
+    date: dateFor(year, monthIndex, day),
+    time: "Due date",
+    location: "Compliance filing",
+    type,
+    description,
+  })
+}
+
+const buildComplianceEvents = (year: number): ComplianceEvent[] => {
+  const events: ComplianceEvent[] = []
+
+  for (let month = 0; month < 12; month += 1) {
+    addEvent(events, year, month, 7, "tds", "TDS/TCS Payment", "Monthly TDS/TCS payment due for deductions collected in the previous month.")
+    addEvent(events, year, month, 11, "gst", "GSTR-1 Filing", "Monthly outward supplies return due for regular GST taxpayers.")
+    addEvent(events, year, month, 20, "gst", "GSTR-3B Filing", "Monthly GST summary return and tax payment due date.")
+  }
+
+  addEvent(events, year, 0, 31, "tds", "Quarterly TDS Return", "TDS return for October to December quarter.")
+  addEvent(events, year, 4, 31, "tds", "Quarterly TDS Return", "TDS return for January to March quarter.")
+  addEvent(events, year, 6, 31, "tds", "Quarterly TDS Return", "TDS return for April to June quarter.")
+  addEvent(events, year, 9, 31, "tds", "Quarterly TDS Return", "TDS return for July to September quarter.")
+
+  addEvent(events, year, 2, 15, "income-tax", "Advance Tax - Final Instalment", "Final advance tax instalment for the financial year.")
+  addEvent(events, year, 5, 15, "income-tax", "Advance Tax - First Instalment", "First advance tax instalment for the financial year.")
+  addEvent(events, year, 6, 31, "income-tax", "ITR Filing - Non Audit", "Income tax return due date for individuals and non-audit taxpayers.")
+  addEvent(events, year, 8, 15, "income-tax", "Advance Tax - Second Instalment", "Second advance tax instalment for the financial year.")
+  addEvent(events, year, 8, 30, "income-tax", "Tax Audit Report", "Tax audit report filing due date, where applicable.")
+  addEvent(events, year, 9, 31, "income-tax", "ITR Filing - Audit Cases", "Income tax return due date for taxpayers requiring audit.")
+  addEvent(events, year, 10, 30, "income-tax", "Transfer Pricing Return", "Return due date for cases requiring transfer pricing report.")
+  addEvent(events, year, 11, 15, "income-tax", "Advance Tax - Third Instalment", "Third advance tax instalment for the financial year.")
+
+  addEvent(events, year, 8, 30, "roc", "DIR-3 KYC", "Annual KYC due date for DIN holders, as applicable.")
+  addEvent(events, year, 9, 29, "roc", "AOC-4 Filing", "Financial statements filing due date for companies after AGM.")
+  addEvent(events, year, 10, 29, "roc", "MGT-7 / MGT-7A Filing", "Annual return filing due date for companies after AGM.")
+
+  addEvent(events, year, 3, 30, "msme", "MSME Form 1 - Half Yearly", "MSME outstanding dues return for October to March period.")
+  addEvent(events, year, 9, 31, "msme", "MSME Form 1 - Half Yearly", "MSME outstanding dues return for April to September period.")
+
+  return events.sort((a, b) => a.date.localeCompare(b.date))
+}
+
+export function Calendar() {
+  const today = new Date()
+  const [currentMonth, setCurrentMonth] = useState(today.getMonth())
+  const [currentYear, setCurrentYear] = useState(today.getFullYear())
+  const [selectedDate, setSelectedDate] = useState<string | null>(null)
+  const [filter, setFilter] = useState<EventType | null>(null)
+
+  const events = useMemo(() => buildComplianceEvents(currentYear), [currentYear])
+
+  const filteredEvents = events.filter((event) => {
     const matchesDate = !selectedDate || event.date === selectedDate
     const matchesFilter = !filter || event.type === filter
-    return matchesDate && matchesFilter
+    const eventMonth = new Date(event.date).getMonth()
+    return matchesDate && matchesFilter && (selectedDate || eventMonth === currentMonth)
   })
 
-  // Generate calendar days
   const generateCalendarDays = () => {
     const firstDay = new Date(currentYear, currentMonth, 1).getDay()
     const daysInMonth = new Date(currentYear, currentMonth + 1, 0).getDate()
-
     const days = []
-    // Add empty cells for days before the first day of the month
-    for (let i = 0; i < firstDay; i++) {
-      days.push(<div key={`empty-${i}`} className="h-10 w-10"></div>)
+
+    for (let i = 0; i < firstDay; i += 1) {
+      days.push(<div key={`empty-${i}`} className="h-10 w-10" />)
     }
 
-    // Add days of the month
-    for (let day = 1; day <= daysInMonth; day++) {
-      const date = `${currentYear}-${String(currentMonth + 1).padStart(2, "0")}-${String(day).padStart(2, "0")}`
-      const hasEvent = EVENTS.some((event) => event.date === date)
+    for (let day = 1; day <= daysInMonth; day += 1) {
+      const date = dateFor(currentYear, currentMonth, day)
+      const dayEvents = events.filter((event) => event.date === date)
+      const hasEvent = dayEvents.length > 0
+      const hasSelectedType = filter ? dayEvents.some((event) => event.type === filter) : hasEvent
 
       days.push(
         <button
           key={day}
           onClick={() => setSelectedDate(selectedDate === date ? null : date)}
-          className={`h-10 w-10 rounded-full flex items-center justify-center transition-all ${
+          className={`relative h-10 w-10 rounded-full flex items-center justify-center transition-all ${
             selectedDate === date
-              ? "bg-ca-darkBlue text-white"
-              : hasEvent
-                ? "bg-blue-100 text-blue-800 hover:bg-blue-200"
+              ? "bg-ca-darkBlue text-white shadow-lg"
+              : hasSelectedType
+                ? "bg-ca-purple/10 text-ca-purple hover:bg-ca-purple/20"
                 : "hover:bg-gray-100"
           }`}
         >
           {day}
+          {hasSelectedType && <span className="absolute bottom-1 h-1.5 w-1.5 rounded-full bg-ca-orange" />}
         </button>,
       )
     }
@@ -109,7 +167,6 @@ export function Calendar() {
     return days
   }
 
-  // Navigate to previous month
   const prevMonth = () => {
     if (currentMonth === 0) {
       setCurrentMonth(11)
@@ -120,7 +177,6 @@ export function Calendar() {
     setSelectedDate(null)
   }
 
-  // Navigate to next month
   const nextMonth = () => {
     if (currentMonth === 11) {
       setCurrentMonth(0)
@@ -138,69 +194,49 @@ export function Calendar() {
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.5 }}
     >
-      <div className="p-6 border-b">
-        <h2 className="text-2xl font-bold text-ca-darkBlue flex items-center">
+      <div className="p-6 border-b bg-gradient-to-r from-ca-darkBlue to-ca-purple text-white">
+        <h2 className="text-2xl font-bold flex items-center">
           <CalendarIcon className="mr-2 h-6 w-6" />
-          Upcoming Events
+          Upcoming Compliance Due Dates
         </h2>
+        <p className="mt-2 text-sm text-white/75">GST, income tax, TDS, ROC, and MSME filing reminders.</p>
       </div>
 
-      {/* Calendar Header */}
       <div className="p-4 bg-gray-50">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex space-x-2">
-            <button onClick={prevMonth} className="p-2 rounded-full hover:bg-gray-200 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M12.707 5.293a1 1 0 010 1.414L9.414 10l3.293 3.293a1 1 0 01-1.414 1.414l-4-4a1 1 0 010-1.414l4-4a1 1 0 011.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+        <div className="flex flex-col gap-4 mb-4 xl:flex-row xl:items-center xl:justify-between">
+          <div className="flex items-center space-x-2">
+            <button onClick={prevMonth} className="p-2 rounded-full hover:bg-gray-200 transition-colors" aria-label="Previous month">
+              <span className="text-xl leading-none">‹</span>
             </button>
-            <h3 className="text-lg font-medium">
+            <h3 className="min-w-44 text-center text-lg font-medium">
               {MONTHS[currentMonth]} {currentYear}
             </h3>
-            <button onClick={nextMonth} className="p-2 rounded-full hover:bg-gray-200 transition-colors">
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                <path
-                  fillRule="evenodd"
-                  d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z"
-                  clipRule="evenodd"
-                />
-              </svg>
+            <button onClick={nextMonth} className="p-2 rounded-full hover:bg-gray-200 transition-colors" aria-label="Next month">
+              <span className="text-xl leading-none">›</span>
             </button>
           </div>
 
-          <div className="flex space-x-2">
+          <div className="flex flex-wrap gap-2">
             <button
               onClick={() => setFilter(null)}
               className={`px-3 py-1 text-xs rounded-full ${!filter ? "bg-ca-darkBlue text-white" : "bg-gray-200 hover:bg-gray-300"}`}
             >
               All
             </button>
-            <button
-              onClick={() => setFilter("webinar")}
-              className={`px-3 py-1 text-xs rounded-full ${filter === "webinar" ? "bg-blue-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
-            >
-              Webinars
-            </button>
-            <button
-              onClick={() => setFilter("seminar")}
-              className={`px-3 py-1 text-xs rounded-full ${filter === "seminar" ? "bg-green-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
-            >
-              Seminars
-            </button>
-            <button
-              onClick={() => setFilter("workshop")}
-              className={`px-3 py-1 text-xs rounded-full ${filter === "workshop" ? "bg-purple-600 text-white" : "bg-gray-200 hover:bg-gray-300"}`}
-            >
-              Workshops
-            </button>
+            {(Object.keys(EVENT_TYPES) as EventType[]).map((type) => (
+              <button
+                key={type}
+                onClick={() => setFilter(filter === type ? null : type)}
+                className={`px-3 py-1 text-xs rounded-full ${
+                  filter === type ? "bg-ca-purple text-white" : "bg-gray-200 hover:bg-gray-300"
+                }`}
+              >
+                {EVENT_TYPES[type].label}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Calendar Grid */}
         <div className="grid grid-cols-7 gap-1 mb-4">
           {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((day) => (
             <div key={day} className="h-10 flex items-center justify-center font-medium text-gray-500">
@@ -211,46 +247,36 @@ export function Calendar() {
         </div>
       </div>
 
-      {/* Events List */}
       <div className="p-4">
         <h3 className="text-lg font-medium mb-4">
           {selectedDate
-            ? `Events on ${new Date(selectedDate).toLocaleDateString("en-IN", { day: "numeric", month: "long", year: "numeric" })}`
-            : filter
-              ? `Upcoming ${filter.charAt(0).toUpperCase() + filter.slice(1)}s`
-              : "Upcoming Events"}
+            ? `Due dates on ${new Date(selectedDate).toLocaleDateString("en-IN", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              })}`
+            : `${MONTHS[currentMonth]} due dates`}
         </h3>
 
         {filteredEvents.length > 0 ? (
-          <div className="space-y-4">
+          <div className="space-y-3">
             {filteredEvents.map((event) => (
               <motion.div
                 key={event.id}
-                className="border rounded-lg p-4 hover:shadow-md transition-shadow"
-                whileHover={{ scale: 1.02 }}
+                className="rounded-2xl border border-gray-100 bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-md"
+                whileHover={{ scale: 1.01 }}
                 transition={{ duration: 0.2 }}
               >
-                <div className="flex items-start">
-                  <div
-                    className={`p-3 rounded-lg mr-4 ${
-                      event.type === "webinar"
-                        ? "bg-blue-100 text-blue-600"
-                        : event.type === "seminar"
-                          ? "bg-green-100 text-green-600"
-                          : "bg-purple-100 text-purple-600"
-                    }`}
-                  >
-                    {event.type === "webinar" ? (
-                      <Users className="h-6 w-6" />
-                    ) : event.type === "seminar" ? (
-                      <MapPin className="h-6 w-6" />
-                    ) : (
-                      <Clock className="h-6 w-6" />
-                    )}
-                  </div>
+                <div className="flex items-start gap-4">
+                  <div className={`rounded-xl border p-3 ${EVENT_TYPES[event.type].color}`}>{EVENT_TYPES[event.type].icon}</div>
                   <div className="flex-1">
-                    <h4 className="font-bold text-lg">{event.title}</h4>
-                    <p className="text-gray-600 text-sm mb-2">{event.description}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-bold text-lg text-gray-900">{event.title}</h4>
+                      <span className={`rounded-full border px-2.5 py-1 text-xs font-medium ${EVENT_TYPES[event.type].color}`}>
+                        {EVENT_TYPES[event.type].label}
+                      </span>
+                    </div>
+                    <p className="text-gray-600 text-sm mt-1 mb-3">{event.description}</p>
                     <div className="flex flex-wrap gap-y-2">
                       <div className="flex items-center text-sm text-gray-500 mr-4">
                         <CalendarIcon className="h-4 w-4 mr-1" />
@@ -264,25 +290,21 @@ export function Calendar() {
                         <Clock className="h-4 w-4 mr-1" />
                         {event.time}
                       </div>
-                      <div className="flex items-center text-sm text-gray-500">
-                        <MapPin className="h-4 w-4 mr-1" />
-                        {event.location}
-                      </div>
+                      <div className="flex items-center text-sm text-gray-500">{event.location}</div>
                     </div>
                   </div>
-                </div>
-                <div className="mt-4 flex justify-end">
-                  <button className="flex items-center text-ca-darkBlue hover:text-blue-700 text-sm font-medium">
-                    Register Now
-                    <ExternalLink className="h-4 w-4 ml-1" />
-                  </button>
                 </div>
               </motion.div>
             ))}
           </div>
         ) : (
-          <div className="text-center py-8 text-gray-500">No events found for the selected criteria.</div>
+          <div className="text-center py-8 text-gray-500">No due dates found for the selected criteria.</div>
         )}
+
+        <p className="mt-4 text-xs text-gray-500">
+          Due dates are common reference dates and may shift for holidays, state-specific rules, turnover categories, or
+          official extensions.
+        </p>
       </div>
     </motion.div>
   )

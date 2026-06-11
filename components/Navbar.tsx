@@ -3,38 +3,26 @@
 import { useState, useRef, useEffect } from "react"
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import {
-  Menu,
-  X,
-  ChevronDown,
-  Calculator,
-  Calendar,
-  Link2,
-  Database,
-  BookOpen,
-  Newspaper,
-  LogIn,
-  User,
-  ExternalLink,
-} from "lucide-react"
-import { useAuth } from "@/contexts/AuthContext"
+import { Menu, X, ChevronDown, Calculator, Link2, Database, Landmark } from "lucide-react"
 import Logo from "./Logo"
 
+const MANAGER_PRO_LOGIN_URL = "https://manager-pro-gamma.vercel.app/"
+
 export default function Navbar() {
-  const employeeClientLoginUrl = "https://manager-pro-gamma.vercel.app/"
   const [isOpen, setIsOpen] = useState(false)
-  const [isUserMenuOpen, setIsUserMenuOpen] = useState(false)
   const [isKnowledgeMenuOpen, setIsKnowledgeMenuOpen] = useState(false)
   const [isMobileKnowledgeOpen, setIsMobileKnowledgeOpen] = useState(false)
   const [isServicesMenuOpen, setIsServicesMenuOpen] = useState(false)
   const [isMobileServicesOpen, setIsMobileServicesOpen] = useState(false)
+  const [isLoginMenuOpen, setIsLoginMenuOpen] = useState(false)
+  const [isMobileLoginOpen, setIsMobileLoginOpen] = useState(false)
   const pathname = usePathname()
-  const { user, signOut } = useAuth()
-  const userMenuRef = useRef<HTMLDivElement>(null)
   const knowledgeMenuRef = useRef<HTMLDivElement>(null)
   const mobileKnowledgeRef = useRef<HTMLDivElement>(null)
   const servicesMenuRef = useRef<HTMLDivElement>(null)
   const mobileServicesRef = useRef<HTMLDivElement>(null)
+  const loginMenuRef = useRef<HTMLDivElement>(null)
+  const mobileLoginRef = useRef<HTMLDivElement>(null)
 
   const toggleMenu = () => {
     setIsOpen(!isOpen)
@@ -44,16 +32,10 @@ export default function Navbar() {
     setIsOpen(false)
   }
 
-  const toggleUserMenu = () => {
-    setIsUserMenuOpen(!isUserMenuOpen)
-    if (isKnowledgeMenuOpen) setIsKnowledgeMenuOpen(false)
-    if (isServicesMenuOpen) setIsServicesMenuOpen(false)
-  }
-
   const toggleKnowledgeMenu = () => {
     setIsKnowledgeMenuOpen(!isKnowledgeMenuOpen)
-    if (isUserMenuOpen) setIsUserMenuOpen(false)
     if (isServicesMenuOpen) setIsServicesMenuOpen(false)
+    if (isLoginMenuOpen) setIsLoginMenuOpen(false)
   }
 
   const toggleMobileKnowledge = () => {
@@ -62,12 +44,22 @@ export default function Navbar() {
 
   const toggleServicesMenu = () => {
     setIsServicesMenuOpen(!isServicesMenuOpen)
-    if (isUserMenuOpen) setIsUserMenuOpen(false)
     if (isKnowledgeMenuOpen) setIsKnowledgeMenuOpen(false)
+    if (isLoginMenuOpen) setIsLoginMenuOpen(false)
   }
 
   const toggleMobileServices = () => {
     setIsMobileServicesOpen(!isMobileServicesOpen)
+  }
+
+  const toggleLoginMenu = () => {
+    setIsLoginMenuOpen(!isLoginMenuOpen)
+    if (isKnowledgeMenuOpen) setIsKnowledgeMenuOpen(false)
+    if (isServicesMenuOpen) setIsServicesMenuOpen(false)
+  }
+
+  const toggleMobileLogin = () => {
+    setIsMobileLoginOpen(!isMobileLoginOpen)
   }
 
   const isActive = (path: string) => {
@@ -75,26 +67,19 @@ export default function Navbar() {
   }
 
   const isKnowledgeActive = () => {
-    return (
-      pathname.startsWith("/blog") ||
-      pathname.startsWith("/news") ||
-      pathname.startsWith("/knowledge") ||
-      pathname.startsWith("/ca-tools")
-    )
+    return pathname.startsWith("/knowledge") || pathname.startsWith("/ca-tools")
   }
 
-  const handleSignOut = async () => {
-    await signOut()
-    setIsUserMenuOpen(false)
-    closeMenu()
-  }
+  const desktopNavItemClass = (active: boolean) =>
+    `inline-flex h-10 items-center border-b-2 px-1 text-sm font-medium leading-none ${
+      active
+        ? "border-ca-purple text-gray-900"
+        : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
+    }`
 
   // Close menus when clicking outside
   useEffect(() => {
     function handleClickOutside(event: MouseEvent) {
-      if (userMenuRef.current && !userMenuRef.current.contains(event.target as Node)) {
-        setIsUserMenuOpen(false)
-      }
       if (knowledgeMenuRef.current && !knowledgeMenuRef.current.contains(event.target as Node)) {
         setIsKnowledgeMenuOpen(false)
       }
@@ -107,6 +92,12 @@ export default function Navbar() {
       if (mobileServicesRef.current && !mobileServicesRef.current.contains(event.target as Node)) {
         setIsMobileServicesOpen(false)
       }
+      if (loginMenuRef.current && !loginMenuRef.current.contains(event.target as Node)) {
+        setIsLoginMenuOpen(false)
+      }
+      if (mobileLoginRef.current && !mobileLoginRef.current.contains(event.target as Node)) {
+        setIsMobileLoginOpen(false)
+      }
     }
 
     document.addEventListener("mousedown", handleClickOutside)
@@ -117,32 +108,24 @@ export default function Navbar() {
 
   return (
     <nav className="bg-white shadow-sm sticky top-0 z-50">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 xl:px-8">
         <div className="flex justify-between h-20">
           <div className="flex-shrink-0 flex items-center">
             <Link href="/" className="flex items-center">
               <Logo linkWrapper={false} size="small" />
             </Link>
           </div>
-          <div className="hidden md:flex md:items-center md:justify-end md:flex-1">
-            <div className="flex space-x-8">
+          <div className="hidden lg:flex lg:flex-1 lg:items-center lg:justify-end">
+            <div className="flex items-center gap-5 xl:gap-8">
               <Link
                 href="/"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive("/")
-                    ? "border-ca-purple text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                }`}
+                className={desktopNavItemClass(isActive("/"))}
               >
                 Home
               </Link>
               <Link
                 href="/about"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive("/about")
-                    ? "border-ca-purple text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                }`}
+                className={desktopNavItemClass(isActive("/about"))}
               >
                 About Us
               </Link>
@@ -150,16 +133,12 @@ export default function Navbar() {
               <div className="relative" ref={servicesMenuRef}>
                 <button
                   onClick={toggleServicesMenu}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    pathname.startsWith("/services")
-                      ? "border-ca-purple text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                  }`}
+                  className={`${desktopNavItemClass(pathname.startsWith("/services"))} gap-1`}
                   aria-expanded={isServicesMenuOpen}
                 >
                   Services
                   <ChevronDown
-                    className={`ml-1 h-4 w-4 transition-transform ${isServicesMenuOpen ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 transition-transform ${isServicesMenuOpen ? "rotate-180" : ""}`}
                   />
                 </button>
 
@@ -227,20 +206,15 @@ export default function Navbar() {
                 )}
               </div>
 
-              {/* Knowledge Center Dropdown */}
               <div className="relative" ref={knowledgeMenuRef}>
                 <button
                   onClick={toggleKnowledgeMenu}
-                  className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                    isKnowledgeActive()
-                      ? "border-ca-purple text-gray-900"
-                      : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                  }`}
+                  className={`${desktopNavItemClass(isKnowledgeActive())} gap-1`}
                   aria-expanded={isKnowledgeMenuOpen}
                 >
                   Knowledge Center
                   <ChevronDown
-                    className={`ml-1 h-4 w-4 transition-transform ${isKnowledgeMenuOpen ? "rotate-180" : ""}`}
+                    className={`h-4 w-4 transition-transform ${isKnowledgeMenuOpen ? "rotate-180" : ""}`}
                   />
                 </button>
 
@@ -248,20 +222,11 @@ export default function Navbar() {
                   <div className="absolute left-0 z-10 mt-2 w-56 origin-top-left bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="py-1">
                       <Link
-                        href="/blog"
+                        href="/knowledge"
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsKnowledgeMenuOpen(false)}
                       >
-                        <BookOpen className="mr-2 h-4 w-4 text-ca-purple" />
-                        Blogs
-                      </Link>
-                      <Link
-                        href="/news"
-                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        onClick={() => setIsKnowledgeMenuOpen(false)}
-                      >
-                        <Newspaper className="mr-2 h-4 w-4 text-ca-purple" />
-                        News
+                        Knowledge Center
                       </Link>
                     </div>
                     <div className="py-1">
@@ -275,12 +240,12 @@ export default function Navbar() {
                         Tax Calculator
                       </Link>
                       <Link
-                        href="/ca-tools/important-dates"
+                        href="/ca-tools/emi-calculator"
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
                         onClick={() => setIsKnowledgeMenuOpen(false)}
                       >
-                        <Calendar className="mr-2 h-4 w-4 text-ca-purple" />
-                        Important Dates
+                        <Landmark className="mr-2 h-4 w-4 text-ca-purple" />
+                        EMI Calculator
                       </Link>
                       <Link
                         href="/ca-tools/important-links"
@@ -305,89 +270,38 @@ export default function Navbar() {
 
               <Link
                 href="/contact"
-                className={`inline-flex items-center px-1 pt-1 border-b-2 text-sm font-medium ${
-                  isActive("/contact")
-                    ? "border-ca-purple text-gray-900"
-                    : "border-transparent text-gray-500 hover:border-gray-300 hover:text-gray-700"
-                }`}
+                className={desktopNavItemClass(isActive("/contact"))}
               >
                 Contact
               </Link>
-            </div>
-            <div className="ml-8 flex items-center space-x-4">
-              {user ? (
-                <div className="relative ml-3" ref={userMenuRef}>
-                  <button
-                    type="button"
-                    onClick={toggleUserMenu}
-                    className="flex items-center space-x-2 text-sm rounded-full focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-ca-purple"
-                    id="user-menu-button"
-                    aria-expanded={isUserMenuOpen}
-                    aria-haspopup="true"
-                  >
-                    <span className="sr-only">Open user menu</span>
-                    <div className="h-8 w-8 rounded-full bg-ca-purple flex items-center justify-center text-white">
-                      {user.email?.charAt(0).toUpperCase()}
-                    </div>
-                    <span className="text-gray-700 font-medium hidden lg:inline-block">
-                      {user.email?.split("@")[0]}
-                    </span>
-                  </button>
 
-                  {isUserMenuOpen && (
-                    <div
-                      className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none"
-                      role="menu"
-                      aria-orientation="vertical"
-                      aria-labelledby="user-menu-button"
-                      tabIndex={-1}
-                    >
-                      <Link
-                        href="/account"
-                        className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                        tabIndex={-1}
-                        onClick={() => setIsUserMenuOpen(false)}
-                      >
-                        Your Account
-                      </Link>
-                      {user.email === "karthikeyakumar.nallam@gmail.com" && (
-                        <Link
-                          href="/admin/blog"
-                          className="block px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                          role="menuitem"
-                          tabIndex={-1}
-                          onClick={() => setIsUserMenuOpen(false)}
-                        >
-                          Admin Dashboard
-                        </Link>
-                      )}
-                      <button
-                        onClick={handleSignOut}
-                        className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                        role="menuitem"
-                        tabIndex={-1}
-                      >
-                        Sign out
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ) : (
-                <a
-                  href={employeeClientLoginUrl}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="inline-flex items-center rounded-md px-3 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 hover:text-ca-purple"
+              <div className="relative" ref={loginMenuRef}>
+                <button
+                  onClick={toggleLoginMenu}
+                  className="inline-flex h-10 items-center gap-1 rounded-md bg-ca-purple px-4 text-sm font-medium leading-none text-white hover:bg-ca-purple/90"
+                  aria-expanded={isLoginMenuOpen}
                 >
-                  <LogIn className="mr-1.5 h-4 w-4" />
-                  Employee/Client Login
-                  <ExternalLink className="ml-1.5 h-3.5 w-3.5 text-gray-400" />
-                </a>
-              )}
+                  Login
+                  <ChevronDown className={`h-4 w-4 transition-transform ${isLoginMenuOpen ? "rotate-180" : ""}`} />
+                </button>
+
+                {isLoginMenuOpen && (
+                  <div className="absolute right-0 z-10 mt-2 w-56 origin-top-right bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                    <div className="py-1">
+                      <a
+                        href={MANAGER_PRO_LOGIN_URL}
+                        className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        onClick={() => setIsLoginMenuOpen(false)}
+                      >
+                        Employee/Client Login
+                      </a>
+                    </div>
+                  </div>
+                )}
+              </div>
             </div>
           </div>
-          <div className="-mr-2 flex items-center md:hidden">
+          <div className="-mr-2 flex items-center lg:hidden">
             <button
               onClick={toggleMenu}
               type="button"
@@ -402,7 +316,7 @@ export default function Navbar() {
       </div>
 
       {/* Mobile menu */}
-      <div className={`${isOpen ? "block" : "hidden"} md:hidden`}>
+      <div className={`${isOpen ? "block" : "hidden"} lg:hidden`}>
         <div className="pt-2 pb-3 space-y-1">
           <Link
             href="/"
@@ -498,7 +412,6 @@ export default function Navbar() {
             )}
           </div>
 
-          {/* Knowledge Center Mobile Section - Styled like Login */}
           <div className="border-l-4 border-transparent" ref={mobileKnowledgeRef}>
             <button
               onClick={toggleMobileKnowledge}
@@ -512,20 +425,11 @@ export default function Navbar() {
               <div className="mt-2 space-y-1 px-2">
                 <div className="pl-3 pr-4 py-1 text-xs font-semibold text-gray-500">Resources</div>
                 <Link
-                  href="/blog"
+                  href="/knowledge"
                   className="flex items-center pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                   onClick={closeMenu}
                 >
-                  <BookOpen className="mr-2 h-5 w-5 text-ca-purple" />
-                  <span>Blogs</span>
-                </Link>
-                <Link
-                  href="/news"
-                  className="flex items-center pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
-                  onClick={closeMenu}
-                >
-                  <Newspaper className="mr-2 h-5 w-5 text-ca-purple" />
-                  <span>News</span>
+                  <span>Knowledge Center</span>
                 </Link>
 
                 <div className="pl-3 pr-4 py-1 text-xs font-semibold text-gray-500">CA Tools</div>
@@ -538,12 +442,12 @@ export default function Navbar() {
                   <span>Tax Calculator</span>
                 </Link>
                 <Link
-                  href="/ca-tools/important-dates"
+                  href="/ca-tools/emi-calculator"
                   className="flex items-center pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                   onClick={closeMenu}
                 >
-                  <Calendar className="mr-2 h-5 w-5 text-ca-purple" />
-                  <span>Important Dates</span>
+                  <Landmark className="mr-2 h-5 w-5 text-ca-purple" />
+                  <span>EMI Calculator</span>
                 </Link>
                 <Link
                   href="/ca-tools/important-links"
@@ -576,61 +480,28 @@ export default function Navbar() {
           >
             Contact
           </Link>
-        </div>
-        <div className="pt-4 pb-3 border-t border-gray-200">
-          {user ? (
-            <div className="space-y-1">
-              <div className="flex items-center px-4 py-2">
-                <div className="flex-shrink-0">
-                  <div className="h-10 w-10 rounded-full bg-ca-purple flex items-center justify-center text-white">
-                    {user.email?.charAt(0).toUpperCase()}
-                  </div>
-                </div>
-                <div className="ml-3">
-                  <div className="text-base font-medium text-gray-800 truncate max-w-[200px]">{user.email}</div>
-                </div>
-              </div>
-              <Link
-                href="/account"
-                className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-                onClick={closeMenu}
-              >
-                Your Account
-              </Link>
-              {user.email === "karthikeyakumar.nallam@gmail.com" && (
-                <Link
-                  href="/admin/blog"
-                  className="block pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
+
+          <div className="border-l-4 border-transparent" ref={mobileLoginRef}>
+            <button
+              onClick={toggleMobileLogin}
+              className="w-full flex items-center justify-between pl-3 pr-4 py-2 text-base font-medium text-gray-500 hover:bg-gray-50 hover:text-gray-700"
+            >
+              <span>Login</span>
+              <ChevronDown className={`h-5 w-5 transition-transform ${isMobileLoginOpen ? "rotate-180" : ""}`} />
+            </button>
+
+            {isMobileLoginOpen && (
+              <div className="mt-2 space-y-1 px-2">
+                <a
+                  href={MANAGER_PRO_LOGIN_URL}
+                  className="flex items-center pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
                   onClick={closeMenu}
                 >
-                  Admin Dashboard
-                </Link>
-              )}
-              <button
-                onClick={handleSignOut}
-                className="block w-full text-left pl-3 pr-4 py-2 border-l-4 border-transparent text-base font-medium text-gray-500 hover:bg-gray-50 hover:border-gray-300 hover:text-gray-700"
-              >
-                Sign out
-              </button>
-            </div>
-          ) : (
-            <div className="mt-3 space-y-1 px-2">
-              <div className="pl-3 pr-4 py-1 text-xs font-semibold text-gray-500">Login</div>
-              <a
-                href={employeeClientLoginUrl}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="flex items-center justify-between pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:bg-gray-50 hover:text-gray-900"
-                onClick={closeMenu}
-              >
-                <div className="flex items-center">
-                  <User className="mr-2 h-5 w-5 text-ca-purple" />
                   <span>Employee/Client Login</span>
-                </div>
-                <ExternalLink className="h-4 w-4 text-gray-400" />
-              </a>
-            </div>
-          )}
+                </a>
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </nav>

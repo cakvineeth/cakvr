@@ -67,7 +67,7 @@ export default function CorporateImageCarousel() {
       initial={{ opacity: 0, y: 30 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{ duration: 0.8 }}
-      className="relative w-full h-[400px] md:h-[500px] rounded-xl overflow-hidden shadow-lg"
+      className="relative w-full h-[360px] md:h-[420px] xl:h-[500px] rounded-xl overflow-hidden shadow-lg"
       onMouseEnter={handleInteraction}
       onTouchStart={handleInteraction}
     >
@@ -87,11 +87,11 @@ export default function CorporateImageCarousel() {
               fill
               className="object-cover"
               priority={index === 0}
-              sizes="(max-width: 768px) 100vw, 1200px"
+              sizes="(max-width: 1280px) 100vw, 1200px"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-black/70 to-transparent" />
             <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
-              <h3 className="text-xl md:text-2xl font-semibold">{image.caption}</h3>
+              <h3 className="text-xl xl:text-2xl font-semibold">{image.caption}</h3>
             </div>
           </motion.div>
         ))}

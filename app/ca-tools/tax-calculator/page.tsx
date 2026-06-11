@@ -1,535 +1,480 @@
 "use client"
 
-import { useState } from "react"
-import { Calculator, ArrowRight, HelpCircle, Plus, Minus } from "lucide-react"
-import { motion } from "framer-motion"
+import { useMemo, useState } from "react"
+import { ArrowRight, Calculator, HelpCircle } from "lucide-react"
+
+type AssessmentYear = "2026-27" | "2027-28"
+type Regime = "new" | "old"
+
+type Slab = {
+  upto: number | null
+  rate: number
+  label: string
+}
+
+type TaxConfig = {
+  financialYear: string
+  note: string
+  regimes: Record<
+    Regime,
+    {
+      label: string
+      standardDeduction: number
+      rebateLimit: number
+      rebateAmount: number
+      slabs: Slab[]
+    }
+  >
+}
+
+const TAX_CONFIG: Record<AssessmentYear, TaxConfig> = {
+  "2026-27": {
+    financialYear: "2025-26",
+    note: "AY 2026-27 slabs for non-senior resident individuals.",
+    regimes: {
+      old: {
+        label: "Old Regime",
+        standardDeduction: 50000,
+        rebateLimit: 500000,
+        rebateAmount: 12500,
+        slabs: [
+          { upto: 250000, rate: 0, label: "Up to ₹2,50,000" },
+          { upto: 500000, rate: 0.05, label: "₹2,50,001 to ₹5,00,000" },
+          { upto: 1000000, rate: 0.2, label: "₹5,00,001 to ₹10,00,000" },
+          { upto: null, rate: 0.3, label: "Above ₹10,00,000" },
+        ],
+      },
+      new: {
+        label: "New Regime",
+        standardDeduction: 75000,
+        rebateLimit: 1200000,
+        rebateAmount: 60000,
+        slabs: [
+          { upto: 400000, rate: 0, label: "Up to ₹4,00,000" },
+          { upto: 800000, rate: 0.05, label: "₹4,00,001 to ₹8,00,000" },
+          { upto: 1200000, rate: 0.1, label: "₹8,00,001 to ₹12,00,000" },
+          { upto: 1600000, rate: 0.15, label: "₹12,00,001 to ₹16,00,000" },
+          { upto: 2000000, rate: 0.2, label: "₹16,00,001 to ₹20,00,000" },
+          { upto: 2400000, rate: 0.25, label: "₹20,00,001 to ₹24,00,000" },
+          { upto: null, rate: 0.3, label: "Above ₹24,00,000" },
+        ],
+      },
+    },
+  },
+  "2027-28": {
+    financialYear: "2026-27",
+    note: "FY 2026-27 / AY 2027-28 uses the same slab structure currently applicable after Budget 2026.",
+    regimes: {
+      old: {
+        label: "Old Regime",
+        standardDeduction: 50000,
+        rebateLimit: 500000,
+        rebateAmount: 12500,
+        slabs: [
+          { upto: 250000, rate: 0, label: "Up to ₹2,50,000" },
+          { upto: 500000, rate: 0.05, label: "₹2,50,001 to ₹5,00,000" },
+          { upto: 1000000, rate: 0.2, label: "₹5,00,001 to ₹10,00,000" },
+          { upto: null, rate: 0.3, label: "Above ₹10,00,000" },
+        ],
+      },
+      new: {
+        label: "New Regime",
+        standardDeduction: 75000,
+        rebateLimit: 1200000,
+        rebateAmount: 60000,
+        slabs: [
+          { upto: 400000, rate: 0, label: "Up to ₹4,00,000" },
+          { upto: 800000, rate: 0.05, label: "₹4,00,001 to ₹8,00,000" },
+          { upto: 1200000, rate: 0.1, label: "₹8,00,001 to ₹12,00,000" },
+          { upto: 1600000, rate: 0.15, label: "₹12,00,001 to ₹16,00,000" },
+          { upto: 2000000, rate: 0.2, label: "₹16,00,001 to ₹20,00,000" },
+          { upto: 2400000, rate: 0.25, label: "₹20,00,001 to ₹24,00,000" },
+          { upto: null, rate: 0.3, label: "Above ₹24,00,000" },
+        ],
+      },
+    },
+  },
+}
+
+const formatCurrency = (value: number) =>
+  new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: "INR",
+    maximumFractionDigits: 0,
+  }).format(value)
+
+const calculateSlabTax = (taxableIncome: number, slabs: Slab[]) => {
+  let previousLimit = 0
+  let tax = 0
+
+  const breakup = slabs.map((slab) => {
+    const upperLimit = slab.upto ?? taxableIncome
+    const slabAmount = Math.max(Math.min(taxableIncome, upperLimit) - previousLimit, 0)
+    const slabTax = slabAmount * slab.rate
+    previousLimit = upperLimit
+    tax += slabTax
+
+    return {
+      label: slab.label,
+      rate: slab.rate,
+      taxableAmount: Math.round(slabAmount),
+      tax: Math.round(slabTax),
+    }
+  })
+
+  return { tax, breakup }
+}
+
+const calculateTax = (
+  annualIncome: number,
+  assessmentYear: AssessmentYear,
+  regime: Regime,
+  oldRegimeDeductions: number,
+) => {
+  const config = TAX_CONFIG[assessmentYear].regimes[regime]
+  const deductions = config.standardDeduction + (regime === "old" ? oldRegimeDeductions : 0)
+  const taxableIncome = Math.max(annualIncome - deductions, 0)
+  const slabResult = calculateSlabTax(taxableIncome, config.slabs)
+  const taxBeforeRebate = slabResult.tax
+  let rebate = taxableIncome <= config.rebateLimit ? Math.min(taxBeforeRebate, config.rebateAmount) : 0
+
+  let taxAfterRebate = Math.max(taxBeforeRebate - rebate, 0)
+
+  if (regime === "new" && taxableIncome > config.rebateLimit) {
+    const marginalReliefCap = taxableIncome - config.rebateLimit
+    if (taxAfterRebate > marginalReliefCap) {
+      rebate += taxAfterRebate - marginalReliefCap
+      taxAfterRebate = marginalReliefCap
+    }
+  }
+
+  const cess = taxAfterRebate * 0.04
+
+  return {
+    taxableIncome: Math.round(taxableIncome),
+    deductions: Math.round(deductions),
+    taxBeforeRebate: Math.round(taxBeforeRebate),
+    rebate: Math.round(rebate),
+    taxAfterRebate: Math.round(taxAfterRebate),
+    cess: Math.round(cess),
+    total: Math.round(taxAfterRebate + cess),
+    breakup: slabResult.breakup,
+  }
+}
 
 export default function TaxCalculatorPage() {
-  const [income, setIncome] = useState<number | "">("")
-  const [regime, setRegime] = useState<"old" | "new">("old")
-  const [showAdvancedOptions, setShowAdvancedOptions] = useState(false)
-
-  // Deductions and exemptions for old regime
-  const [standardDeduction, setStandardDeduction] = useState<number>(50000)
+  const [assessmentYear, setAssessmentYear] = useState<AssessmentYear>("2026-27")
+  const [regime, setRegime] = useState<Regime>("new")
+  const [income, setIncome] = useState<number | "">(1200000)
   const [section80C, setSection80C] = useState<number | "">(0)
   const [section80D, setSection80D] = useState<number | "">(0)
   const [hraExemption, setHraExemption] = useState<number | "">(0)
-  const [ltaExemption, setLtaExemption] = useState<number | "">(0)
   const [homeLoanInterest, setHomeLoanInterest] = useState<number | "">(0)
-  const [otherExemptions, setOtherExemptions] = useState<number | "">(0)
-
+  const [otherDeductions, setOtherDeductions] = useState<number | "">(0)
   const [showResults, setShowResults] = useState(false)
 
-  // Calculate tax based on old regime
-  const calculateOldRegimeTax = () => {
-    if (income === "") return { tax: 0, cess: 0, total: 0, taxableIncome: 0 }
+  const annualIncome = Number(income) || 0
+  const oldRegimeDeductions =
+    (Number(section80C) || 0) +
+    (Number(section80D) || 0) +
+    (Number(hraExemption) || 0) +
+    (Number(homeLoanInterest) || 0) +
+    (Number(otherDeductions) || 0)
 
-    // Calculate total deductions
-    const totalDeductions = (Number(section80C) || 0) + (Number(section80D) || 0)
+  const selectedResult = useMemo(
+    () => calculateTax(annualIncome, assessmentYear, regime, oldRegimeDeductions),
+    [annualIncome, assessmentYear, oldRegimeDeductions, regime],
+  )
 
-    // Calculate taxable income
-    const taxableIncome = Math.max(
-      Number(income) -
-        totalDeductions -
-        (Number(hraExemption) || 0) -
-        (Number(ltaExemption) || 0) -
-        standardDeduction -
-        (Number(homeLoanInterest) || 0) -
-        (Number(otherExemptions) || 0),
-      0,
-    )
+  const comparison = useMemo(
+    () => ({
+      new: calculateTax(annualIncome, assessmentYear, "new", oldRegimeDeductions),
+      old: calculateTax(annualIncome, assessmentYear, "old", oldRegimeDeductions),
+    }),
+    [annualIncome, assessmentYear, oldRegimeDeductions],
+  )
 
-    let tax = 0
+  const currentConfig = TAX_CONFIG[assessmentYear]
+  const selectedRegimeConfig = currentConfig.regimes[regime]
+  const inputClass =
+    "w-full rounded-md border border-gray-300 bg-white px-3 py-2 text-black focus:border-ca-purple focus:outline-none focus:ring-2 focus:ring-ca-purple/20"
 
-    // Apply tax slabs progressively
-    if (taxableIncome <= 250000) {
-      tax = 0
-    } else if (taxableIncome <= 500000) {
-      tax = (taxableIncome - 250000) * 0.05
-    } else if (taxableIncome <= 1000000) {
-      tax = 12500 + (taxableIncome - 500000) * 0.2
-    } else {
-      tax = 12500 + 100000 + (taxableIncome - 1000000) * 0.3
+  const setNumericValue =
+    (setter: (value: number | "") => void, max?: number) => (event: React.ChangeEvent<HTMLInputElement>) => {
+      if (event.target.value === "") {
+        setter("")
+        setShowResults(false)
+        return
+      }
+
+      const nextValue = Number(event.target.value)
+      setter(max ? Math.min(nextValue, max) : nextValue)
+      setShowResults(false)
     }
-
-    // Apply rebate under section 87A (if applicable)
-    if (taxableIncome <= 500000) {
-      tax = Math.max(0, tax - 12500)
-    }
-
-    // Calculate health and education cess (4%)
-    const cess = tax * 0.04
-
-    return {
-      tax: Math.round(tax),
-      cess: Math.round(cess),
-      total: Math.round(tax + cess),
-      taxableIncome: Math.round(taxableIncome),
-    }
-  }
-
-  // Calculate tax based on new regime
-  const calculateNewRegimeTax = () => {
-    if (income === "") return { tax: 0, cess: 0, total: 0, taxableIncome: 0 }
-
-    // In new regime, only standard deduction is allowed
-    const taxableIncome = Math.max(Number(income) - standardDeduction, 0)
-    let tax = 0
-
-    // Apply tax slabs progressively
-    if (taxableIncome <= 250000) {
-      tax = 0
-    } else if (taxableIncome <= 500000) {
-      tax = (taxableIncome - 250000) * 0.05
-    } else if (taxableIncome <= 750000) {
-      tax = 12500 + (taxableIncome - 500000) * 0.1
-    } else if (taxableIncome <= 1000000) {
-      tax = 37500 + (taxableIncome - 750000) * 0.15
-    } else if (taxableIncome <= 1250000) {
-      tax = 75000 + (taxableIncome - 1000000) * 0.2
-    } else if (taxableIncome <= 1500000) {
-      tax = 125000 + (taxableIncome - 1250000) * 0.25
-    } else {
-      tax = 187500 + (taxableIncome - 1500000) * 0.3
-    }
-
-    // Apply rebate under section 87A (if applicable)
-    if (taxableIncome <= 700000) {
-      tax = Math.max(0, tax - 25000)
-    }
-
-    // Calculate health and education cess (4%)
-    const cess = tax * 0.04
-
-    return {
-      tax: Math.round(tax),
-      cess: Math.round(cess),
-      total: Math.round(tax + cess),
-      taxableIncome: Math.round(taxableIncome),
-    }
-  }
-
-  const taxDetails = regime === "old" ? calculateOldRegimeTax() : calculateNewRegimeTax()
-
-  const handleCalculate = () => {
-    setShowResults(true)
-  }
-
-  // Common input style with explicit background and text colors
-  const inputStyle =
-    "w-full px-3 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ca-darkBlue bg-white text-black"
 
   return (
-    <div className="max-w-4xl mx-auto py-8 px-4">
+    <div className="max-w-6xl mx-auto py-8 px-4">
       <div className="text-center mb-10">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Income Tax Calculator</h1>
         <p className="text-gray-600">
-          Calculate your income tax liability for the Financial Year 2024-25 (Assessment Year 2025-26)
+          Calculate tax for AY 2026-27 and AY 2027-28 under both old and new regimes.
         </p>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-ca-darkBlue flex items-center">
-            <Calculator className="mr-2 h-5 w-5" />
-            Income Tax Calculator
-            <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">FY 2024-25</span>
-          </h2>
-        </div>
+      <div className="grid gap-6 lg:grid-cols-[420px_1fr]">
+        <div className="bg-white rounded-xl shadow-md overflow-hidden h-fit">
+          <div className="p-6 border-b">
+            <h2 className="text-xl font-bold text-ca-darkBlue flex items-center">
+              <Calculator className="mr-2 h-5 w-5" />
+              Tax Inputs
+            </h2>
+          </div>
 
-        <div className="p-6">
-          <div className="space-y-6">
-            {/* Income Input */}
+          <div className="p-6 space-y-5">
             <div>
-              <label className="block text-sm font-medium text-gray-700 mb-1">Annual Income (₹)</label>
-              <input
-                type="number"
-                value={income}
-                onChange={(e) => {
-                  setIncome(e.target.value === "" ? "" : Number(e.target.value))
+              <label className="block text-sm font-medium text-gray-700 mb-1">Assessment Year</label>
+              <select
+                value={assessmentYear}
+                onChange={(event) => {
+                  setAssessmentYear(event.target.value as AssessmentYear)
                   setShowResults(false)
                 }}
-                placeholder="Enter your annual income"
-                className={inputStyle}
-                style={{ color: "black", backgroundColor: "white" }}
-              />
+                className={inputClass}
+              >
+                <option value="2026-27">AY 2026-27 (FY 2025-26)</option>
+                <option value="2027-28">AY 2027-28 (FY 2026-27)</option>
+              </select>
             </div>
 
-            {/* Tax Regime Selection */}
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Annual Income (₹)</label>
+              <input type="number" min="0" value={income} onChange={setNumericValue(setIncome)} className={inputClass} />
+            </div>
+
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
                 Tax Regime
-                <div className="group relative ml-1">
+                <span className="group relative ml-1">
                   <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
-                  <div className="absolute left-0 bottom-full mb-2 w-64 bg-black text-white text-xs rounded p-2 hidden group-hover:block z-10">
-                    <p>Old Regime: Higher tax rates but allows deductions and exemptions</p>
-                    <p className="mt-1">
-                      New Regime: Lower tax rates but most deductions and exemptions are not available
-                    </p>
-                  </div>
-                </div>
+                  <span className="absolute left-0 bottom-full mb-2 hidden w-72 rounded bg-black p-2 text-xs text-white group-hover:block z-10">
+                    New regime is the default regime. Old regime allows more deductions but uses higher slabs.
+                  </span>
+                </span>
               </label>
-              <div className="flex space-x-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRegime("old")
-                    setShowResults(false)
-                  }}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium ${
-                    regime === "old" ? "bg-ca-darkBlue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  Old Regime
-                </button>
-                <button
-                  type="button"
-                  onClick={() => {
-                    setRegime("new")
-                    setShowResults(false)
-                  }}
-                  className={`flex-1 py-2 px-3 rounded-md text-sm font-medium ${
-                    regime === "new" ? "bg-ca-darkBlue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-                  }`}
-                >
-                  New Regime
-                </button>
+              <div className="grid grid-cols-2 gap-2">
+                {(["new", "old"] as Regime[]).map((option) => (
+                  <button
+                    key={option}
+                    type="button"
+                    onClick={() => {
+                      setRegime(option)
+                      setShowResults(false)
+                    }}
+                    className={`rounded-md px-3 py-2 text-sm font-medium ${
+                      regime === option ? "bg-ca-darkBlue text-white" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                    }`}
+                  >
+                    {currentConfig.regimes[option].label}
+                  </button>
+                ))}
               </div>
             </div>
 
-            {/* Advanced Options Toggle */}
-            <div>
-              <button
-                type="button"
-                onClick={() => setShowAdvancedOptions(!showAdvancedOptions)}
-                className="flex items-center text-ca-darkBlue hover:text-blue-700 text-sm font-medium"
-              >
-                {showAdvancedOptions ? (
-                  <>
-                    <Minus className="h-4 w-4 mr-1" />
-                    Hide Advanced Options
-                  </>
-                ) : (
-                  <>
-                    <Plus className="h-4 w-4 mr-1" />
-                    Show Advanced Options
-                  </>
-                )}
-              </button>
+            <div className="rounded-lg border bg-gray-50 p-4">
+              <p className="text-sm font-medium text-gray-700">Standard Deduction</p>
+              <p className="text-lg font-bold text-ca-purple">{formatCurrency(selectedRegimeConfig.standardDeduction)}</p>
+              <p className="text-xs text-gray-500 mt-1">Applied automatically for salaried/pension income estimation.</p>
             </div>
 
-            {/* Advanced Options */}
-            {showAdvancedOptions && (
-              <div className="space-y-4 border-t border-b py-4">
-                <h3 className="font-medium text-gray-700">Deductions & Exemptions</h3>
-
-                {/* Standard Deduction */}
+            {regime === "old" && (
+              <div className="space-y-4 border-t pt-5">
+                <h3 className="font-semibold text-gray-800">Old Regime Deductions & Exemptions</h3>
                 <div>
-                  <label className="block text-sm font-medium text-gray-700 mb-1">
-                    Standard Deduction (₹)
-                    <span className="ml-1 text-xs text-gray-500">(Fixed at ₹50,000)</span>
-                  </label>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Section 80C (max ₹1,50,000)</label>
+                  <input type="number" min="0" value={section80C} onChange={setNumericValue(setSection80C, 150000)} className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Section 80D</label>
+                  <input type="number" min="0" value={section80D} onChange={setNumericValue(setSection80D)} className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">HRA Exemption</label>
+                  <input type="number" min="0" value={hraExemption} onChange={setNumericValue(setHraExemption)} className={inputClass} />
+                </div>
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Home Loan Interest (max ₹2,00,000)</label>
                   <input
                     type="number"
-                    value={standardDeduction}
-                    disabled
-                    className="w-full px-3 py-2 border rounded-md bg-gray-100 text-gray-700"
-                    style={{ color: "black" }}
+                    min="0"
+                    value={homeLoanInterest}
+                    onChange={setNumericValue(setHomeLoanInterest, 200000)}
+                    className={inputClass}
                   />
                 </div>
-
-                {regime === "old" && (
-                  <>
-                    {/* Section 80C */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                        Section 80C Deductions (₹)
-                        <div className="group relative ml-1">
-                          <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
-                          <div className="absolute left-0 bottom-full mb-2 w-64 bg-black text-white text-xs rounded p-2 hidden group-hover:block z-10">
-                            <p>Includes PPF, ELSS, Life Insurance Premium, etc. (Max: ₹1,50,000)</p>
-                          </div>
-                        </div>
-                      </label>
-                      <input
-                        type="number"
-                        value={section80C}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? "" : Number(e.target.value)
-                          setSection80C(value === "" ? value : Math.min(value, 150000))
-                          setShowResults(false)
-                        }}
-                        placeholder="Enter amount (max: ₹1,50,000)"
-                        className={inputStyle}
-                        style={{ color: "black", backgroundColor: "white" }}
-                      />
-                    </div>
-
-                    {/* Section 80D */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                        Section 80D Deductions (₹)
-                        <div className="group relative ml-1">
-                          <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
-                          <div className="absolute left-0 bottom-full mb-2 w-64 bg-black text-white text-xs rounded p-2 hidden group-hover:block z-10">
-                            <p>
-                              Health Insurance Premium (Max: ₹25,000 for self & family, additional ₹25,000 for parents)
-                            </p>
-                          </div>
-                        </div>
-                      </label>
-                      <input
-                        type="number"
-                        value={section80D}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? "" : Number(e.target.value)
-                          setSection80D(value === "" ? value : Math.min(value, 100000))
-                          setShowResults(false)
-                        }}
-                        placeholder="Enter amount"
-                        className={inputStyle}
-                        style={{ color: "black", backgroundColor: "white" }}
-                      />
-                    </div>
-
-                    {/* HRA Exemption */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">HRA Exemption (₹)</label>
-                      <input
-                        type="number"
-                        value={hraExemption}
-                        onChange={(e) => {
-                          setHraExemption(e.target.value === "" ? "" : Number(e.target.value))
-                          setShowResults(false)
-                        }}
-                        placeholder="Enter amount"
-                        className={inputStyle}
-                        style={{ color: "black", backgroundColor: "white" }}
-                      />
-                    </div>
-
-                    {/* LTA Exemption */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1">LTA Exemption (₹)</label>
-                      <input
-                        type="number"
-                        value={ltaExemption}
-                        onChange={(e) => {
-                          setLtaExemption(e.target.value === "" ? "" : Number(e.target.value))
-                          setShowResults(false)
-                        }}
-                        placeholder="Enter amount"
-                        className={inputStyle}
-                        style={{ color: "black", backgroundColor: "white" }}
-                      />
-                    </div>
-
-                    {/* Home Loan Interest */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                        Home Loan Interest (₹)
-                        <div className="group relative ml-1">
-                          <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
-                          <div className="absolute left-0 bottom-full mb-2 w-64 bg-black text-white text-xs rounded p-2 hidden group-hover:block z-10">
-                            <p>Section 24B & 80EEA (Max: ₹2,00,000 for self-occupied property)</p>
-                          </div>
-                        </div>
-                      </label>
-                      <input
-                        type="number"
-                        value={homeLoanInterest}
-                        onChange={(e) => {
-                          const value = e.target.value === "" ? "" : Number(e.target.value)
-                          setHomeLoanInterest(value === "" ? value : Math.min(value, 200000))
-                          setShowResults(false)
-                        }}
-                        placeholder="Enter amount (max: ₹2,00,000)"
-                        className={inputStyle}
-                        style={{ color: "black", backgroundColor: "white" }}
-                      />
-                    </div>
-
-                    {/* Other Exemptions */}
-                    <div>
-                      <label className="block text-sm font-medium text-gray-700 mb-1 flex items-center">
-                        Other Exemptions (₹)
-                        <div className="group relative ml-1">
-                          <HelpCircle className="h-4 w-4 text-gray-400 cursor-help" />
-                          <div className="absolute left-0 bottom-full mb-2 w-64 bg-black text-white text-xs rounded p-2 hidden group-hover:block z-10">
-                            <p>Professional Tax, NPS, 80G donations, etc.</p>
-                          </div>
-                        </div>
-                      </label>
-                      <input
-                        type="number"
-                        value={otherExemptions}
-                        onChange={(e) => {
-                          setOtherExemptions(e.target.value === "" ? "" : Number(e.target.value))
-                          setShowResults(false)
-                        }}
-                        placeholder="Enter amount"
-                        className={inputStyle}
-                        style={{ color: "black", backgroundColor: "white" }}
-                      />
-                    </div>
-                  </>
-                )}
+                <div>
+                  <label className="block text-sm font-medium text-gray-700 mb-1">Other Deductions</label>
+                  <input type="number" min="0" value={otherDeductions} onChange={setNumericValue(setOtherDeductions)} className={inputClass} />
+                </div>
               </div>
             )}
 
-            {/* Calculate Button */}
             <button
-              onClick={handleCalculate}
-              disabled={income === ""}
+              type="button"
+              onClick={() => setShowResults(true)}
+              disabled={!annualIncome}
               className="w-full bg-ca-darkBlue text-white py-2 px-4 rounded-md hover:bg-blue-700 transition-colors disabled:bg-gray-300 disabled:cursor-not-allowed flex items-center justify-center"
             >
               Calculate Tax
               <ArrowRight className="ml-2 h-4 w-4" />
             </button>
-
-            {/* Results */}
-            {showResults && (
-              <motion.div
-                initial={{ opacity: 0, height: 0 }}
-                animate={{ opacity: 1, height: "auto" }}
-                className="mt-4 border-t pt-4"
-              >
-                <h3 className="font-medium text-gray-700 mb-2">Tax Calculation Results</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between py-1 border-b">
-                    <span className="text-gray-600">Gross Total Income</span>
-                    <span className="font-medium text-black">₹ {Number(income).toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b">
-                    <span className="text-gray-600">Taxable Income</span>
-                    <span className="font-medium text-black">₹ {taxDetails.taxableIncome.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b">
-                    <span className="text-gray-600">Income Tax</span>
-                    <span className="font-medium text-black">₹ {taxDetails.tax.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between py-1 border-b">
-                    <span className="text-gray-600">Health & Education Cess (4%)</span>
-                    <span className="font-medium text-black">₹ {taxDetails.cess.toLocaleString("en-IN")}</span>
-                  </div>
-                  <div className="flex justify-between py-2 font-bold">
-                    <span className="text-black">Total Tax Liability</span>
-                    <span className="text-ca-darkBlue">₹ {taxDetails.total.toLocaleString("en-IN")}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4 bg-blue-50 p-3 rounded-md text-xs text-gray-600">
-                  <p className="font-medium text-gray-700 mb-1">Note:</p>
-                  <p>
-                    This is a simplified calculation for illustration purposes only. For accurate tax assessment, please
-                    consult with a tax professional.
-                  </p>
-                </div>
-              </motion.div>
-            )}
           </div>
         </div>
-      </div>
 
-      <div className="mt-8 bg-white rounded-xl shadow-md overflow-hidden">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-ca-darkBlue">Tax Slabs for FY 2024-25</h2>
-        </div>
-        <div className="p-6">
-          <div className="grid md:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-semibold text-lg mb-3">Old Tax Regime</h3>
-              <div className="border rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Income Range
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Tax Rate
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Up to ₹2,50,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Nil</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹2,50,001 to ₹5,00,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹5,00,001 to ₹10,00,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">20%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Above ₹10,00,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">30%</td>
-                    </tr>
-                  </tbody>
-                </table>
-              </div>
+        <div className="space-y-6">
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-bold text-ca-darkBlue">
+                {currentConfig.regimes[regime].label} Result
+                <span className="ml-2 text-xs bg-blue-100 text-blue-800 px-2 py-1 rounded">FY {currentConfig.financialYear}</span>
+              </h2>
             </div>
-            <div>
-              <h3 className="font-semibold text-lg mb-3">New Tax Regime</h3>
-              <div className="border rounded-lg overflow-hidden">
-                <table className="min-w-full divide-y divide-gray-200">
-                  <thead className="bg-gray-50">
-                    <tr>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Income Range
-                      </th>
-                      <th
-                        scope="col"
-                        className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"
-                      >
-                        Tax Rate
-                      </th>
-                    </tr>
-                  </thead>
-                  <tbody className="bg-white divide-y divide-gray-200">
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Up to ₹2,50,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">Nil</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹2,50,001 to ₹5,00,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">5%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹5,00,001 to ₹7,50,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">10%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹7,50,001 to ₹10,00,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">15%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹10,00,001 to ₹12,50,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">20%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">₹12,50,001 to ₹15,00,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">25%</td>
-                    </tr>
-                    <tr>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">Above ₹15,00,000</td>
-                      <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">30%</td>
-                    </tr>
-                  </tbody>
-                </table>
+
+            {showResults ? (
+              <div className="p-6">
+                <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <p className="text-sm text-gray-500">Taxable Income</p>
+                    <p className="text-xl font-bold text-gray-900">{formatCurrency(selectedResult.taxableIncome)}</p>
+                  </div>
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <p className="text-sm text-gray-500">Rebate / Relief</p>
+                    <p className="text-xl font-bold text-green-700">{formatCurrency(selectedResult.rebate)}</p>
+                  </div>
+                  <div className="rounded-lg bg-gray-50 p-4">
+                    <p className="text-sm text-gray-500">Cess (4%)</p>
+                    <p className="text-xl font-bold text-gray-900">{formatCurrency(selectedResult.cess)}</p>
+                  </div>
+                  <div className="rounded-lg bg-ca-darkBlue p-4 text-white">
+                    <p className="text-sm text-white/75">Total Tax</p>
+                    <p className="text-xl font-bold">{formatCurrency(selectedResult.total)}</p>
+                  </div>
+                </div>
+
+                <div className="grid gap-6 md:grid-cols-2">
+                  <div>
+                    <h3 className="font-semibold text-gray-800 mb-3">Summary</h3>
+                    <div className="space-y-2 text-sm">
+                      <div className="flex justify-between border-b py-2">
+                        <span className="text-gray-600">Gross Income</span>
+                        <span className="font-medium text-gray-900">{formatCurrency(annualIncome)}</span>
+                      </div>
+                      <div className="flex justify-between border-b py-2">
+                        <span className="text-gray-600">Total Deductions</span>
+                        <span className="font-medium text-gray-900">{formatCurrency(selectedResult.deductions)}</span>
+                      </div>
+                      <div className="flex justify-between border-b py-2">
+                        <span className="text-gray-600">Tax Before Rebate</span>
+                        <span className="font-medium text-gray-900">{formatCurrency(selectedResult.taxBeforeRebate)}</span>
+                      </div>
+                      <div className="flex justify-between border-b py-2">
+                        <span className="text-gray-600">Tax After Rebate</span>
+                        <span className="font-medium text-gray-900">{formatCurrency(selectedResult.taxAfterRebate)}</span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <h3 className="font-semibold text-gray-800 mb-3">Regime Comparison</h3>
+                    <div className="grid grid-cols-2 gap-3">
+                      <div className="rounded-lg border p-4">
+                        <p className="text-sm text-gray-500">New Regime</p>
+                        <p className="text-2xl font-bold text-ca-purple">{formatCurrency(comparison.new.total)}</p>
+                      </div>
+                      <div className="rounded-lg border p-4">
+                        <p className="text-sm text-gray-500">Old Regime</p>
+                        <p className="text-2xl font-bold text-ca-orange">{formatCurrency(comparison.old.total)}</p>
+                      </div>
+                    </div>
+                    <p className="mt-3 text-sm text-gray-600">
+                      Lower estimate:{" "}
+                      <span className="font-semibold text-gray-900">
+                        {comparison.new.total <= comparison.old.total ? "New Regime" : "Old Regime"}
+                      </span>
+                    </p>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <h3 className="font-semibold text-gray-800 mb-3">Slab-wise Breakup</h3>
+                  <div className="overflow-x-auto rounded-lg border">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          {["Income Range", "Rate", "Taxable Amount", "Tax"].map((heading) => (
+                            <th key={heading} className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                              {heading}
+                            </th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {selectedResult.breakup.map((row) => (
+                          <tr key={row.label}>
+                            <td className="px-4 py-3 text-sm text-gray-700">{row.label}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{row.rate * 100}%</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{formatCurrency(row.taxableAmount)}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{formatCurrency(row.tax)}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
+            ) : (
+              <div className="p-6 text-center text-gray-500">Enter income details and click Calculate Tax.</div>
+            )}
+          </div>
+
+          <div className="bg-white rounded-xl shadow-md overflow-hidden">
+            <div className="p-6 border-b">
+              <h2 className="text-xl font-bold text-ca-darkBlue">Tax Slabs for AY {assessmentYear}</h2>
+              <p className="text-sm text-gray-500 mt-1">{currentConfig.note}</p>
+            </div>
+            <div className="grid gap-6 p-6 md:grid-cols-2">
+              {(["new", "old"] as Regime[]).map((option) => (
+                <div key={option}>
+                  <h3 className="font-semibold text-lg mb-3">{currentConfig.regimes[option].label}</h3>
+                  <div className="overflow-hidden rounded-lg border">
+                    <table className="min-w-full divide-y divide-gray-200">
+                      <thead className="bg-gray-50">
+                        <tr>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            Income Range
+                          </th>
+                          <th className="px-4 py-3 text-left text-xs font-medium uppercase tracking-wider text-gray-500">
+                            Tax Rate
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-200 bg-white">
+                        {currentConfig.regimes[option].slabs.map((slab) => (
+                          <tr key={slab.label}>
+                            <td className="px-4 py-3 text-sm text-gray-600">{slab.label}</td>
+                            <td className="px-4 py-3 text-sm text-gray-900">{slab.rate === 0 ? "Nil" : `${slab.rate * 100}%`}</td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+              ))}
+            </div>
+            <div className="border-t bg-blue-50 p-4 text-xs text-gray-600">
+              <span className="font-semibold text-gray-700">Disclaimer: </span>
+              This calculator is an estimate for individual taxpayers below 60 years of age. It excludes surcharge,
+              special-rate income, capital gains, agricultural income, and non-salary nuances. For exact tax calculation
+              please contact your tax advisor.
             </div>
           </div>
         </div>

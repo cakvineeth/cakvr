@@ -5,7 +5,7 @@ import { Users, Award, TrendingUp, CheckCircle } from "lucide-react"
 
 const AboutSection = () => {
   return (
-    <section id="about" className="py-24 md:py-32 bg-white relative overflow-hidden">
+    <section id="about" className="py-20 md:py-24 xl:py-32 bg-white relative overflow-hidden">
       {/* Enhanced decorative elements */}
       <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-ca-lightGray/50 rounded-bl-[200px] -z-10"></div>
       <div className="absolute bottom-0 left-0 w-1/4 h-1/4 bg-ca-lightGray/50 rounded-tr-[120px] -z-10"></div>
@@ -13,26 +13,26 @@ const AboutSection = () => {
       <div className="absolute bottom-1/4 right-10 w-40 h-40 rounded-full bg-ca-orange/10 -z-10"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 rounded-full bg-ca-lightGray/20 blur-3xl -z-10"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 xl:px-8">
         {/* Enhanced section header */}
-        <div className="text-center max-w-3xl mx-auto mb-20">
+        <div className="text-center max-w-3xl mx-auto mb-14 xl:mb-20">
           <div className="inline-flex items-center px-5 py-2 bg-ca-purple/10 rounded-full text-ca-purple text-sm font-semibold mb-6">
             <span className="mr-2">✦</span>
             OUR STORY
             <span className="ml-2">✦</span>
           </div>
-          <h2 className="text-4xl md:text-5xl xl:text-6xl font-bold text-gray-900 mb-8 tracking-tight leading-tight">
+          <h2 className="text-[clamp(2.25rem,4vw,4.5rem)] font-bold text-gray-900 mb-6 xl:mb-8 tracking-tight leading-tight">
             Finance, Business and Brand <span className="text-ca-purple">Consulting Excellence</span>
           </h2>
-          <p className="text-xl text-gray-600 max-w-2xl mx-auto">
+          <p className="text-lg xl:text-xl text-gray-600 max-w-2xl mx-auto">
             Delivering strategic financial solutions and business advisory services across South India since 2020
           </p>
         </div>
 
         {/* IMPROVED: Adjusted grid to give more space to the image section */}
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-16 xl:gap-20 items-center">
+        <div className="grid grid-cols-1 xl:grid-cols-12 gap-12 xl:gap-20 items-center">
           {/* IMPROVED: Left column - Larger image that takes 7 of 12 columns */}
-          <div className="relative order-2 lg:order-1 lg:col-span-7">
+          <div className="relative order-2 xl:order-1 xl:col-span-7">
             {/* IMPROVED: Taller image container */}
             <div className="relative z-10 rounded-3xl overflow-hidden shadow-2xl">
               <div className="aspect-[40/40] full relative">
@@ -59,7 +59,7 @@ const AboutSection = () => {
           </div>
 
           {/* IMPROVED: Right column - Content now takes 5 of 12 columns for better balance */}
-          <div className="order-1 lg:order-2 lg:col-span-5">
+          <div className="order-1 xl:order-2 xl:col-span-5">
             <h3 className="text-2xl font-bold text-ca-darkBlue mb-6">Your Trusted Partner for Financial Excellence</h3>
 
             <p className="text-gray-700 mb-6 text-lg leading-relaxed">

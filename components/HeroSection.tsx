@@ -64,12 +64,12 @@ const HeroSection = () => {
       <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-ca-orange/10 blur-3xl"></div>
 
       {/* Main content */}
-      <div className="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="pt-24 pb-20 md:pt-32 md:pb-28">
+      <div className="relative z-10 max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 xl:px-8">
+        <div className="pt-20 pb-16 md:pt-24 md:pb-20 xl:pt-32 xl:pb-28">
           {/* Hero content */}
-          <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 items-center">
+          <div className="grid grid-cols-1 xl:grid-cols-12 gap-8 xl:gap-12 items-center">
             {/* Left column - Main content */}
-            <div className="lg:col-span-7 space-y-8">
+            <div className="xl:col-span-7 space-y-7 xl:space-y-8">
               <div
                 className={`transition-all duration-1000 transform ${
                   isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
@@ -80,11 +80,11 @@ const HeroSection = () => {
                   Chartered Accountants Since 2020
                 </div>
 
-                <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight tracking-tight drop-shadow-md">
+                <h1 className="text-[clamp(2.5rem,4.2vw,4.5rem)] font-bold text-white leading-tight tracking-tight drop-shadow-md">
                   Elevate Your Business with <span className="text-ca-orange">Expert Financial</span> Solutions
                 </h1>
 
-                <p className="mt-6 text-xl text-white/90 max-w-2xl leading-relaxed drop-shadow-sm">
+                <p className="mt-6 text-lg xl:text-xl text-white/90 max-w-2xl leading-relaxed drop-shadow-sm">
                   K VINEETH REDDY & CO LLP provides comprehensive accounting, audit, tax, and advisory services tailored
                   to help your business thrive in today's complex financial landscape.
                 </p>
@@ -101,7 +101,7 @@ const HeroSection = () => {
 
                 <div className="mt-10 flex flex-col sm:flex-row gap-4">
                   <Button
-                    className="bg-ca-orange hover:bg-ca-lightOrange text-white px-8 py-6 rounded-md flex items-center group shadow-lg text-lg"
+                    className="bg-ca-orange hover:bg-ca-lightOrange text-white px-6 xl:px-8 py-5 xl:py-6 rounded-md flex items-center group shadow-lg text-base xl:text-lg"
                     asChild
                   >
                     <Link href="/contact">
@@ -110,7 +110,7 @@ const HeroSection = () => {
                     </Link>
                   </Button>
                   <Button
-                    className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-8 py-6 rounded-md flex items-center group shadow-md text-lg"
+                    className="bg-white/10 hover:bg-white/20 text-white border border-white/20 px-6 xl:px-8 py-5 xl:py-6 rounded-md flex items-center group shadow-md text-base xl:text-lg"
                     onClick={scrollToServices}
                   >
                     Explore Services{" "}
@@ -147,7 +147,7 @@ const HeroSection = () => {
 
             {/* Right column - Talk to Expert component (replacing testimonials) */}
             <div
-              className={`lg:col-span-5 transition-all duration-1000 delay-500 transform ${
+              className={`xl:col-span-5 transition-all duration-1000 delay-500 transform ${
                 isVisible ? "translate-y-0 opacity-100" : "translate-y-10 opacity-0"
               }`}
             >

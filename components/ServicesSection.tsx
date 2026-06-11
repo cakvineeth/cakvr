@@ -152,22 +152,22 @@ const ServicesSection = () => {
   return (
     <section
       id="services"
-      className="py-20 md:py-28 bg-gradient-to-b from-white to-ca-lightGray relative overflow-hidden"
+      className="py-20 md:py-24 xl:py-28 bg-gradient-to-b from-white to-ca-lightGray relative overflow-hidden"
     >
       {/* Decorative elements */}
       <div className="absolute top-0 left-0 w-full h-20 bg-white -z-10"></div>
       <div className="absolute top-40 left-10 w-64 h-64 rounded-full bg-ca-purple/5 -z-10"></div>
       <div className="absolute bottom-40 right-10 w-80 h-80 rounded-full bg-ca-orange/5 -z-10"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 xl:px-8">
         {/* Section header */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-12 xl:mb-16">
           <div className="inline-flex items-center px-4 py-1 bg-ca-orange/10 rounded-full text-ca-orange text-sm font-medium mb-4">
             <span className="mr-2">✦</span>
             OUR EXPERTISE
             <span className="ml-2">✦</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold text-gray-900 mb-6 tracking-tight">
+          <h2 className="text-[clamp(2.25rem,4vw,3.75rem)] font-bold text-gray-900 mb-6 tracking-tight">
             Comprehensive <span className="text-ca-orange">Business Advisory</span> Services
           </h2>
           <p className="text-lg text-gray-600">
@@ -204,7 +204,7 @@ const ServicesSection = () => {
         </div>
 
         {/* Services grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-16">
+        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 xl:gap-8 mb-16">
           {activeServices.map((service, index) => (
             <div
               key={index}

@@ -133,16 +133,6 @@ export function BlogSection() {
           ))}
         </div>
 
-        {/* View All Button */}
-        <div className="mt-6 text-center">
-          <Link
-            href="/blog"
-            className="inline-flex items-center px-4 py-2 border border-ca-darkBlue text-ca-darkBlue rounded-md hover:bg-ca-darkBlue hover:text-white transition-colors"
-          >
-            View All Articles
-            <ChevronRight className="h-4 w-4 ml-1" />
-          </Link>
-        </div>
       </div>
     </motion.div>
   )

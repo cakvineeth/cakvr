@@ -4,7 +4,6 @@ import { Inter } from "next/font/google"
 import "./globals.css"
 import Navbar from "@/components/Navbar"
 import Footer from "@/components/Footer"
-import { AuthProvider } from "@/contexts/AuthContext"
 import { Toaster } from "@/components/ui/toaster"
 import { ThemeProvider } from "@/components/theme-provider"
 import { DisclaimerProvider } from "@/contexts/DisclaimerContext"
@@ -42,20 +41,18 @@ export default function RootLayout({
         <meta name="theme-color" content="#0A0F25" media="(prefers-color-scheme: dark)" />
       </head>
       <body className={inter.className}>
-        <AuthProvider>
-          <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
-            <DisclaimerProvider>
-              <PageWrapper>
-                <div className="min-h-screen flex flex-col">
-                  <Navbar />
-                  <main className="flex-1">{children}</main>
-                  <Footer />
-                </div>
-              </PageWrapper>
-            </DisclaimerProvider>
-            <Toaster />
-          </ThemeProvider>
-        </AuthProvider>
+        <ThemeProvider attribute="class" defaultTheme="system" enableSystem disableTransitionOnChange>
+          <DisclaimerProvider>
+            <PageWrapper>
+              <div className="min-h-screen flex flex-col">
+                <Navbar />
+                <main className="flex-1">{children}</main>
+                <Footer />
+              </div>
+            </PageWrapper>
+          </DisclaimerProvider>
+          <Toaster />
+        </ThemeProvider>
       </body>
     </html>
   )

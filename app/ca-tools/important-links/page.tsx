@@ -1,6 +1,6 @@
 "use client"
 
-import { ExternalLink, FileText, Building, Calculator, Book, Globe, Search } from "lucide-react"
+import { ExternalLink, FileText, Building, Calculator, Book, Globe, Search, Sparkles } from "lucide-react"
 import { useState } from "react"
 import { motion } from "framer-motion"
 
@@ -177,123 +177,140 @@ export default function ImportantLinksPage() {
   })
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Important Links for CA Professionals</h1>
-        <p className="text-gray-600">Essential resources and websites for Chartered Accountants in India</p>
+    <div className="max-w-7xl mx-auto">
+      <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-ca-darkBlue via-ca-purple to-ca-orange p-8 md:p-10 text-white shadow-2xl mb-8">
+        <div className="absolute -right-20 -top-20 h-56 w-56 rounded-full bg-white/10 blur-3xl" />
+        <div className="absolute -bottom-24 left-10 h-64 w-64 rounded-full bg-ca-orange/30 blur-3xl" />
+        <div className="relative grid gap-8 lg:grid-cols-[1fr_360px] lg:items-end">
+          <div>
+            <div className="inline-flex items-center rounded-full border border-white/20 bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur">
+              <Sparkles className="mr-2 h-4 w-4" />
+              Curated professional portals
+            </div>
+            <h1 className="mt-5 text-4xl font-bold tracking-tight md:text-5xl">Important Links</h1>
+            <p className="mt-4 max-w-2xl text-white/85">
+              A quick-launch board for tax, GST, company law, banking, and professional resources used by CA teams.
+            </p>
+          </div>
+
+          <div className="rounded-2xl border border-white/20 bg-white/15 p-5 backdrop-blur">
+            <p className="text-sm text-white/75">Resources indexed</p>
+            <p className="mt-1 text-4xl font-bold">{RESOURCE_LINKS.reduce((count, category) => count + category.links.length, 0)}</p>
+            <p className="mt-2 text-sm text-white/75">Across {RESOURCE_LINKS.length} focused categories</p>
+          </div>
+        </div>
       </div>
 
-      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-ca-darkBlue flex items-center">
-            <Globe className="mr-2 h-5 w-5" />
-            Resource Directory
-          </h2>
-        </div>
+      <div className="sticky top-20 z-20 mb-8 rounded-2xl border border-gray-200 bg-white/90 p-4 shadow-lg backdrop-blur">
+        <div className="grid gap-4 lg:grid-cols-[1fr_auto] lg:items-center">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+            <input
+              type="text"
+              placeholder="Search by portal, tag, or purpose..."
+              className="w-full rounded-xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-black outline-none transition focus:border-ca-purple focus:bg-white focus:ring-4 focus:ring-ca-purple/10"
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+            />
+          </div>
 
-        <div className="p-6">
-          {/* Search and Filter */}
-          <div className="mb-6 space-y-4">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search resources..."
-                className="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ca-darkBlue"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
-            </div>
-
-            <div className="flex flex-wrap gap-2">
+          <div className="flex flex-wrap gap-2">
+            <button
+              onClick={() => setActiveCategory(null)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                activeCategory === null ? "bg-ca-darkBlue text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              All
+            </button>
+            {RESOURCE_LINKS.map((category) => (
               <button
-                onClick={() => setActiveCategory(null)}
-                className={`px-3 py-1 text-sm rounded-md ${
-                  activeCategory === null ? "bg-ca-darkBlue text-white" : "bg-white-100 text-black hover:bg-gray-200"
+                key={category.category}
+                onClick={() => setActiveCategory(activeCategory === category.category ? null : category.category)}
+                className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition ${
+                  activeCategory === category.category
+                    ? "bg-ca-purple text-white shadow-md"
+                    : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                 }`}
               >
-                All Categories
+                {category.icon}
+                <span className="ml-2">{category.category}</span>
               </button>
-              {RESOURCE_LINKS.map((category) => (
-                <button
-                  key={category.category}
-                  onClick={() => setActiveCategory(activeCategory === category.category ? null : category.category)}
-                  className={`px-3 py-1 text-sm rounded-md flex items-center ${
-                    activeCategory === category.category
-                      ? "bg-ca-darkBlue text-white"
-                      : "bg-white-100 text-black hover:bg-gray-200"
-                  }`}
-                >
-                  {category.icon}
-                  <span className="ml-1">{category.category}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-
-          {/* Resource Links */}
-          <div className="space-y-8">
-            {filteredCategories.length > 0 ? (
-              filteredCategories.map((category, index) => (
-                <motion.div
-                  key={category.category}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ delay: index * 0.1 }}
-                >
-                  <h3 className="font-medium text-gray-700 mb-3 flex items-center">
-                    {category.icon}
-                    <span className="ml-1">{category.category}</span>
-                  </h3>
-                  <div className="space-y-3">
-                    {category.links.map((link) => (
-                      <a
-                        key={link.title}
-                        href={link.url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="block p-4 border rounded-lg hover:bg-gray-50 transition-colors"
-                      >
-                        <div className="flex items-start">
-                          <FileText className="h-5 w-5 mr-3 text-ca-darkBlue flex-shrink-0 mt-0.5" />
-                          <div className="flex-1">
-                            <div className="font-medium text-ca-darkBlue flex items-center">
-                              {link.title}
-                              <ExternalLink className="h-3 w-3 ml-1 text-gray-400" />
-                            </div>
-                            <p className="text-sm text-gray-600 mb-2">{link.description}</p>
-                            <div className="flex flex-wrap gap-1">
-                              {link.tags.map((tag) => (
-                                <span key={tag} className="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded">
-                                  #{tag}
-                                </span>
-                              ))}
-                            </div>
-                          </div>
-                        </div>
-                      </a>
-                    ))}
-                  </div>
-                </motion.div>
-              ))
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-gray-500">No resources found matching your search criteria.</p>
-                <button
-                  onClick={() => {
-                    setSearchTerm("")
-                    setActiveCategory(null)
-                  }}
-                  className="mt-2 text-ca-darkBlue hover:underline"
-                >
-                  Clear filters
-                </button>
-              </div>
-            )}
+            ))}
           </div>
         </div>
+      </div>
+
+      <div className="grid gap-6">
+        {filteredCategories.length > 0 ? (
+          filteredCategories.map((category, index) => (
+            <motion.section
+              key={category.category}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: index * 0.08 }}
+              className="rounded-3xl border border-gray-200 bg-white p-5 shadow-md"
+            >
+              <div className="mb-5 flex items-center justify-between gap-4">
+                <div className="flex items-center">
+                  <div className="mr-3 rounded-2xl bg-ca-purple/10 p-3">{category.icon}</div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">{category.category}</h2>
+                    <p className="text-sm text-gray-500">{category.links.length} portals</p>
+                  </div>
+                </div>
+                <Globe className="hidden h-10 w-10 text-gray-100 sm:block" />
+              </div>
+
+              <div className="grid gap-4 md:grid-cols-2 xl:grid-cols-3">
+                {category.links
+                  .filter(
+                    (link) =>
+                      !searchTerm ||
+                      link.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      link.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      link.tags.some((tag) => tag.toLowerCase().includes(searchTerm.toLowerCase())),
+                  )
+                  .map((link) => (
+                    <a
+                      key={link.title}
+                      href={link.url}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="group relative overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-white to-gray-50 p-5 shadow-sm transition hover:-translate-y-1 hover:border-ca-purple/30 hover:shadow-xl"
+                    >
+                      <div className="absolute right-4 top-4 rounded-full bg-ca-purple/10 p-2 text-ca-purple opacity-0 transition group-hover:opacity-100">
+                        <ExternalLink className="h-4 w-4" />
+                      </div>
+                      <FileText className="mb-4 h-7 w-7 text-ca-purple" />
+                      <h3 className="pr-10 text-lg font-bold text-ca-darkBlue">{link.title}</h3>
+                      <p className="mt-2 text-sm leading-relaxed text-gray-600">{link.description}</p>
+                      <div className="mt-4 flex flex-wrap gap-2">
+                        {link.tags.map((tag) => (
+                          <span key={tag} className="rounded-full bg-white px-3 py-1 text-xs font-medium text-gray-600 shadow-sm">
+                            #{tag}
+                          </span>
+                        ))}
+                      </div>
+                    </a>
+                  ))}
+              </div>
+            </motion.section>
+          ))
+        ) : (
+          <div className="rounded-3xl border border-dashed border-gray-300 bg-white p-10 text-center">
+            <p className="text-gray-500">No resources found matching your search criteria.</p>
+            <button
+              onClick={() => {
+                setSearchTerm("")
+                setActiveCategory(null)
+              }}
+              className="mt-3 font-medium text-ca-purple hover:underline"
+            >
+              Clear filters
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )

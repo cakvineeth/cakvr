@@ -137,7 +137,7 @@ const Testimonials = ({
   }
 
   return (
-    <section className={`py-24 relative overflow-hidden ${className}`}>
+    <section className={`py-20 xl:py-24 relative overflow-hidden ${className}`}>
       {/* Background with more vibrant gradient */}
       <div className="absolute inset-0 bg-gradient-to-br from-ca-purple/10 to-ca-orange/10 -z-10"></div>
 
@@ -146,15 +146,15 @@ const Testimonials = ({
       <div className="absolute bottom-20 right-10 w-80 h-80 rounded-full bg-ca-orange/15 blur-xl -z-10"></div>
       <div className="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-[500px] h-[500px] rounded-full border-2 border-ca-purple/20 opacity-50 -z-10"></div>
 
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+      <div className="max-w-6xl 2xl:max-w-7xl mx-auto px-4 sm:px-6 xl:px-8">
         {/* Enhanced section header with more vibrant colors */}
-        <div className="text-center max-w-3xl mx-auto mb-16">
+        <div className="text-center max-w-3xl mx-auto mb-12 xl:mb-16">
           <div className="inline-flex items-center px-4 py-1.5 bg-ca-orange/20 rounded-full text-ca-orange font-semibold mb-4">
             <span className="mr-2">✦</span>
             {subtitle}
             <span className="ml-2">✦</span>
           </div>
-          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight bg-gradient-to-r from-ca-purple to-ca-orange bg-clip-text text-transparent">
+          <h2 className="text-[clamp(2.25rem,4vw,3.75rem)] font-bold mb-6 tracking-tight bg-gradient-to-r from-ca-purple to-ca-orange bg-clip-text text-transparent">
             {title}
           </h2>
           <p className="text-lg text-gray-700">Hear directly from our clients about their experience working with us</p>
@@ -167,7 +167,7 @@ const Testimonials = ({
             <Quote className="w-24 h-24" />
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 xl:gap-8">
             {[0, 1, 2].map((offset) => {
               const index = (currentIndex + offset) % testimonials.length
               const testimonial = testimonials[index]
@@ -176,8 +176,8 @@ const Testimonials = ({
                   key={testimonial.id}
                   className={`bg-white rounded-2xl shadow-xl overflow-hidden h-full flex flex-col transition-all duration-500 ${
                     offset === 1
-                      ? "md:scale-110 md:shadow-2xl z-10 border-t-4 border-ca-purple"
-                      : "md:scale-100 opacity-90 border-t-4 border-ca-orange"
+                      ? "xl:scale-110 xl:shadow-2xl z-10 border-t-4 border-ca-purple"
+                      : "xl:scale-100 opacity-90 border-t-4 border-ca-orange"
                   }`}
                 >
                   <div className="p-8 flex flex-col flex-grow">

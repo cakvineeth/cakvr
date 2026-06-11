@@ -1,5 +1,5 @@
 import Link from "next/link"
-import { Calculator, Calendar, Link2, Database } from "lucide-react"
+import { Calculator, Link2, Database, Landmark } from "lucide-react"
 
 export default function CAToolsPage() {
   return (
@@ -26,16 +26,16 @@ export default function CAToolsPage() {
           </div>
         </Link>
 
-        <Link href="/ca-tools/important-dates">
+        <Link href="/ca-tools/emi-calculator">
           <div className="bg-white rounded-xl shadow-md overflow-hidden hover:shadow-lg transition-shadow h-full">
             <div className="p-6 flex items-start">
               <div className="bg-green-100 p-3 rounded-lg mr-4">
-                <Calendar className="h-6 w-6 text-green-600" />
+                <Landmark className="h-6 w-6 text-green-600" />
               </div>
               <div>
-                <h2 className="text-xl font-bold text-gray-900 mb-2">Important Dates</h2>
+                <h2 className="text-xl font-bold text-gray-900 mb-2">EMI Calculator</h2>
                 <p className="text-gray-600">
-                  Calendar of critical tax and compliance deadlines for the financial year
+                  Calculate monthly EMI, total interest, and a detailed repayment schedule.
                 </p>
               </div>
             </div>

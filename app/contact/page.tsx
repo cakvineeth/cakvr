@@ -90,8 +90,8 @@ export default function Contact() {
               {
                 icon: <Phone className="h-6 w-6" />,
                 title: "Call Us",
-                content: "+91 80 4854 1444",
-                action: "tel:+918048541444",
+                content: "+91 8884449446",
+                action: "tel:+918884449446",
               },
               {
                 icon: <Mail className="h-6 w-6" />,

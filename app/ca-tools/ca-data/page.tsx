@@ -1,7 +1,7 @@
 "use client"
 
 import { useState } from "react"
-import { Database, Search, Filter, Download, ChevronDown, ChevronUp } from "lucide-react"
+import { Database, Search, Filter, ChevronDown, ChevronUp, Layers, Sparkles } from "lucide-react"
 import { motion, AnimatePresence } from "framer-motion"
 
 // Sample CA data - rates, limits, and other important information
@@ -194,91 +194,125 @@ export default function CADataPage() {
   })
 
   return (
-    <div className="max-w-4xl mx-auto">
-      <div className="text-center mb-10">
-        <h1 className="text-3xl font-bold text-gray-900 mb-2">Important Information</h1>
-        <p className="text-gray-600">
-          Comprehensive reference for tax rates, limits, and other important information for CA professionals in India
-        </p>
-      </div>
-
-      <div className="bg-white rounded-xl shadow-md overflow-hidden mb-8">
-        <div className="p-6 border-b">
-          <h2 className="text-xl font-bold text-ca-darkBlue flex items-center">
-            <Database className="mr-2 h-5 w-5" />
-            Information Reference
-          </h2>
-        </div>
-
-        <div className="p-6">
-          {/* Search and Filter */}
-          <div className="mb-6 space-y-4">
-            <div className="relative">
-              <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Search className="h-5 w-5 text-gray-400" />
-              </div>
-              <input
-                type="text"
-                placeholder="Search information..."
-                className="pl-10 w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-ca-darkBlue"
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-              />
+    <div className="max-w-7xl mx-auto">
+      <div className="relative mb-8 overflow-hidden rounded-3xl bg-[#0A0F25] p-8 text-white shadow-2xl md:p-10">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,_rgba(255,140,56,0.35),_transparent_34%),radial-gradient(circle_at_bottom_right,_rgba(74,40,128,0.55),_transparent_38%)]" />
+        <div className="relative grid gap-8 lg:grid-cols-[1fr_380px] lg:items-center">
+          <div>
+            <div className="inline-flex items-center rounded-full bg-white/10 px-4 py-2 text-sm font-medium backdrop-blur">
+              <Sparkles className="mr-2 h-4 w-4 text-ca-orange" />
+              Quick reference desk
             </div>
-
-            <div className="flex flex-wrap gap-2">
-              <button
-                onClick={() => setActiveCategory(null)}
-                className={`px-3 py-1 text-sm rounded-md flex items-center ${
-                  activeCategory === null ? "bg-ca-darkBlue text-white" : "bg-white-100 text-black hover:bg-gray-200"
-                }`}
-              >
-                <Filter className="h-4 w-4 mr-1" />
-                All Categories
-              </button>
-              {CA_DATA.map((category) => (
-                <button
-                  key={category.category}
-                  onClick={() => setActiveCategory(activeCategory === category.category ? null : category.category)}
-                  className={`px-3 py-1 text-sm rounded-md ${
-                    activeCategory === category.category
-                      ? "bg-ca-darkBlue text-white"
-                      : "bg-white-100 text-black hover:bg-gray-200"
-                  }`}
-                >
-                  {category.category}
-                </button>
-              ))}
-            </div>
+            <h1 className="mt-5 text-4xl font-bold tracking-tight md:text-5xl">Important Information</h1>
+            <p className="mt-4 max-w-2xl text-white/80">
+              A compact knowledge board for tax limits, GST thresholds, TDS rates, and company law compliance points.
+            </p>
           </div>
 
-          {/* Data Display */}
-          <div className="space-y-8">
-            {filteredData.length > 0 ? (
-              filteredData.map((category) => (
-                <motion.div
-                  key={category.category}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  className="space-y-4"
-                >
-                  <h3 className="font-semibold text-lg text-gray-800 border-b pb-2">{category.category}</h3>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+              <p className="text-sm text-white/65">Categories</p>
+              <p className="mt-1 text-3xl font-bold">{CA_DATA.length}</p>
+            </div>
+            <div className="rounded-2xl border border-white/15 bg-white/10 p-4 backdrop-blur">
+              <p className="text-sm text-white/65">References</p>
+              <p className="mt-1 text-3xl font-bold">{CA_DATA.reduce((total, category) => total + category.items.length, 0)}</p>
+            </div>
+          </div>
+        </div>
+      </div>
 
-                  {category.items.map((item) => (
-                    <div key={item.title} className="border rounded-lg overflow-hidden">
+      <div className="mb-8 grid gap-4 rounded-3xl border border-gray-200 bg-white p-4 shadow-lg lg:grid-cols-[1fr_auto] lg:items-center">
+        <div className="relative">
+          <Search className="absolute left-4 top-1/2 h-5 w-5 -translate-y-1/2 text-gray-400" />
+          <input
+            type="text"
+            placeholder="Search limits, rates, sections, or compliance terms..."
+            className="w-full rounded-2xl border border-gray-200 bg-gray-50 py-3 pl-12 pr-4 text-black outline-none transition focus:border-ca-purple focus:bg-white focus:ring-4 focus:ring-ca-purple/10"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+        </div>
+
+        <div className="flex flex-wrap gap-2">
+          <button
+            onClick={() => setActiveCategory(null)}
+            className={`inline-flex items-center rounded-full px-4 py-2 text-sm font-medium transition ${
+              activeCategory === null ? "bg-ca-darkBlue text-white shadow-md" : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+            }`}
+          >
+            <Filter className="mr-2 h-4 w-4" />
+            All
+          </button>
+          {CA_DATA.map((category) => (
+            <button
+              key={category.category}
+              onClick={() => setActiveCategory(activeCategory === category.category ? null : category.category)}
+              className={`rounded-full px-4 py-2 text-sm font-medium transition ${
+                activeCategory === category.category
+                  ? "bg-ca-purple text-white shadow-md"
+                  : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+              }`}
+            >
+              {category.category}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        {filteredData.length > 0 ? (
+          filteredData.map((category, categoryIndex) => (
+            <motion.section
+              key={category.category}
+              initial={{ opacity: 0, y: 16 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: categoryIndex * 0.08 }}
+              className="rounded-3xl border border-gray-200 bg-white p-5 shadow-md"
+            >
+              <div className="mb-5 flex items-center justify-between">
+                <div className="flex items-center">
+                  <div className="mr-3 rounded-2xl bg-gradient-to-br from-ca-purple to-ca-orange p-3 text-white">
+                    <Layers className="h-5 w-5" />
+                  </div>
+                  <div>
+                    <h2 className="text-xl font-bold text-gray-900">{category.category}</h2>
+                    <p className="text-sm text-gray-500">{category.items.length} reference cards</p>
+                  </div>
+                </div>
+                <Database className="h-8 w-8 text-gray-100" />
+              </div>
+
+              <div className="space-y-3">
+                {category.items
+                  .filter(
+                    (item) =>
+                      !searchTerm ||
+                      item.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      item.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                      item.data.some(
+                        (data) =>
+                          data.key.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                          data.value.toLowerCase().includes(searchTerm.toLowerCase()),
+                      ),
+                  )
+                  .map((item) => (
+                    <div key={item.title} className="overflow-hidden rounded-2xl border border-gray-100 bg-gradient-to-br from-white to-gray-50">
                       <button
                         onClick={() => toggleItem(item.title)}
-                        className="w-full flex justify-between items-center p-4 text-left focus:outline-none hover:bg-gray-50"
+                        className="flex w-full items-center justify-between gap-4 p-5 text-left transition hover:bg-ca-purple/5"
                       >
                         <div>
-                          <h4 className="font-medium text-gray-900">{item.title}</h4>
-                          <p className="text-sm text-gray-600">{item.description}</p>
+                          <h3 className="font-bold text-ca-darkBlue">{item.title}</h3>
+                          <p className="mt-1 text-sm text-gray-600">{item.description}</p>
                         </div>
-                        {expandedItems[item.title] ? (
-                          <ChevronUp className="h-5 w-5 text-gray-500" />
-                        ) : (
-                          <ChevronDown className="h-5 w-5 text-gray-500" />
-                        )}
+                        <div className="rounded-full bg-white p-2 shadow-sm">
+                          {expandedItems[item.title] ? (
+                            <ChevronUp className="h-5 w-5 text-ca-purple" />
+                          ) : (
+                            <ChevronDown className="h-5 w-5 text-ca-purple" />
+                          )}
+                        </div>
                       </button>
 
                       <AnimatePresence>
@@ -287,58 +321,44 @@ export default function CADataPage() {
                             initial={{ height: 0, opacity: 0 }}
                             animate={{ height: "auto", opacity: 1 }}
                             exit={{ height: 0, opacity: 0 }}
-                            transition={{ duration: 0.3 }}
+                            transition={{ duration: 0.25 }}
                             className="overflow-hidden"
                           >
-                            <div className="p-4 pt-0 bg-gray-50">
-                              <table className="min-w-full divide-y divide-gray-200 mt-2">
-                                <tbody className="divide-y divide-gray-200">
-                                  {item.data.map((data, index) => (
-                                    <tr key={index}>
-                                      <td className="px-4 py-3 text-sm text-gray-700 w-1/2">{data.key}</td>
-                                      <td className="px-4 py-3 text-sm font-medium text-gray-900 w-1/2">
-                                        {data.value}
-                                      </td>
-                                    </tr>
-                                  ))}
-                                </tbody>
-                              </table>
+                            <div className="grid gap-3 border-t border-gray-100 bg-white p-4 sm:grid-cols-2">
+                              {item.data.map((data) => (
+                                <div key={`${item.title}-${data.key}`} className="rounded-xl bg-gray-50 p-4">
+                                  <p className="text-xs font-semibold uppercase tracking-wide text-gray-500">{data.key}</p>
+                                  <p className="mt-2 font-bold text-gray-900">{data.value}</p>
+                                </div>
+                              ))}
                             </div>
                           </motion.div>
                         )}
                       </AnimatePresence>
                     </div>
                   ))}
-                </motion.div>
-              ))
-            ) : (
-              <div className="text-center py-10">
-                <p className="text-gray-500">No information found matching your search criteria.</p>
-                <button
-                  onClick={() => {
-                    setSearchTerm("")
-                    setActiveCategory(null)
-                  }}
-                  className="mt-2 text-ca-darkBlue hover:underline"
-                >
-                  Clear filters
-                </button>
               </div>
-            )}
-          </div>
-
-          <div className="mt-8 text-center">
-            <button className="inline-flex items-center px-4 py-2 border border-ca-darkBlue text-ca-darkBlue rounded-md hover:bg-ca-darkBlue hover:text-white transition-colors">
-              <Download className="h-4 w-4 mr-2" />
-              Download Complete Reference
+            </motion.section>
+          ))
+        ) : (
+          <div className="rounded-3xl border border-dashed border-gray-300 bg-white p-10 text-center lg:col-span-2">
+            <p className="text-gray-500">No information found matching your search criteria.</p>
+            <button
+              onClick={() => {
+                setSearchTerm("")
+                setActiveCategory(null)
+              }}
+              className="mt-3 font-medium text-ca-purple hover:underline"
+            >
+              Clear filters
             </button>
-            <p className="mt-2 text-xs text-gray-500">
-              Last updated: April 1, 2023. Information is provided for reference only and may change based on government
-              notifications.
-            </p>
           </div>
-        </div>
+        )}
       </div>
+
+      <p className="mt-6 text-center text-xs text-gray-500">
+        Information is provided for quick reference only and may change based on government notifications.
+      </p>
     </div>
   )
 }
