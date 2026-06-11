@@ -219,7 +219,7 @@ export default function Navbar() {
                 </button>
 
                 {isKnowledgeMenuOpen && (
-                  <div className="absolute left-0 z-10 mt-2 w-56 origin-top-left bg-white border border-gray-200 divide-y divide-gray-100 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
+                  <div className="absolute left-0 z-10 mt-2 w-56 origin-top-left bg-white border border-gray-200 rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                     <div className="py-1">
                       <Link
                         href="/knowledge"
@@ -228,9 +228,6 @@ export default function Navbar() {
                       >
                         Knowledge Center
                       </Link>
-                    </div>
-                    <div className="py-1">
-                      <div className="px-4 py-2 text-xs font-semibold text-gray-500">CA Tools</div>
                       <Link
                         href="/ca-tools/tax-calculator"
                         className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
@@ -423,7 +420,6 @@ export default function Navbar() {
 
             {isMobileKnowledgeOpen && (
               <div className="mt-2 space-y-1 px-2">
-                <div className="pl-3 pr-4 py-1 text-xs font-semibold text-gray-500">Resources</div>
                 <Link
                   href="/knowledge"
                   className="flex items-center pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
@@ -431,8 +427,6 @@ export default function Navbar() {
                 >
                   <span>Knowledge Center</span>
                 </Link>
-
-                <div className="pl-3 pr-4 py-1 text-xs font-semibold text-gray-500">CA Tools</div>
                 <Link
                   href="/ca-tools/tax-calculator"
                   className="flex items-center pl-3 pr-4 py-2 text-base font-medium text-gray-700 hover:text-gray-900 hover:bg-gray-50"
