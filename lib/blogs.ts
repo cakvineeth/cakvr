@@ -2,9 +2,6 @@
 
 const MANAGER_PRO_API_URL = (process.env.MANAGER_PRO_API_URL || "https://managerpro-production.up.railway.app").replace(/\/$/, "")
 
-// Pages refresh at most this often on their own; Manager Pro also pings
-// /api/revalidate-blogs on approve/unpublish so changes show up right away.
-export const BLOG_REVALIDATE_SECONDS = 300
 export const BLOG_CACHE_TAG = "blogs"
 
 export interface BlogSummary {
@@ -25,8 +22,11 @@ export interface BlogPost extends BlogSummary {
 
 async function fetchFromManagerPro<T>(path: string): Promise<T | null> {
   try {
+    // Always read fresh so edits, approvals and take-downs in Manager Pro show
+    // up on the next page load, without depending on the revalidation ping.
     const res = await fetch(`${MANAGER_PRO_API_URL}${path}`, {
-      next: { revalidate: BLOG_REVALIDATE_SECONDS, tags: [BLOG_CACHE_TAG] },
+      cache: "no-store",
+      next: { tags: [BLOG_CACHE_TAG] },
     })
     if (!res.ok) return null
     return (await res.json()) as T
